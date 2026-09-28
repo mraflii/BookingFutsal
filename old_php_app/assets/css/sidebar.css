@@ -1,0 +1,31 @@
+/* Gaya untuk warna sidebar */
+.navbar {
+  background-color: black; /* Ganti dengan warna yang diinginkan */
+  border-color: #28a745; /* Ganti dengan warna yang diinginkan */
+}
+
+.navbar-toggler-icon {
+  background-color: #fff; /* Ganti dengan warna yang diinginkan */
+}
+
+.offcanvas-body {
+  background-color: white; /* Ganti dengan warna yang diinginkan */
+  color: #fff; /* Ganti dengan warna yang sesuai dengan kebutuhan */
+}
+
+.nav-link {
+  color: black; /* Ganti dengan warna yang sesuai dengan kebutuhan */
+}
+
+.nav-link:hover {
+  color: #fff !; /* Ganti dengan warna yang sesuai dengan kebutuhan */
+  background-color: #218838; /* Ganti dengan warna yang diinginkan saat hover */
+}
+
+.nav-link.active {
+  background-color: #218838 !important; /* Ganti dengan warna yang diinginkan untuk link yang aktif */
+}
+
+.btn-close {
+  color: white; /* Ganti dengan warna yang sesuai dengan kebutuhan */
+}

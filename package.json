@@ -1,0 +1,28 @@
+{
+  "name": "aplikasi-booking-futsal",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "framer-motion": "^13.4.4",
+    "jose": "^6.2.12",
+    "lucide-react": "^1.48.0",
+    "mysql2": "^3.24.4",
+    "next": "16.3.6",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "sweetalert2": "^11.26.25",
+    "uuid": "^14.0.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.6",
+    "tailwindcss": "^4"
+  }
+}
