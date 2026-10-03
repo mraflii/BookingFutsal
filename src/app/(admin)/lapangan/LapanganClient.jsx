@@ -22,33 +22,35 @@ export default function LapanganClient({ initialData }) {
     setSelectedData(data)
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+  const clientAction = async (formData) => {
     setIsLoading(true)
     setError(null)
 
-    const formData = new FormData(e.target)
     let result
 
-    if (modalType === 'add') {
-      result = await addLapangan(null, formData)
-    } else if (modalType === 'edit') {
-      result = await editLapangan(null, formData)
-    } else if (modalType === 'delete') {
-      result = await deleteLapangan(null, formData)
-    }
+    try {
+      if (modalType === 'add') {
+        result = await addLapangan(null, formData)
+      } else if (modalType === 'edit') {
+        result = await editLapangan(null, formData)
+      } else if (modalType === 'delete') {
+        result = await deleteLapangan(null, formData)
+      }
 
-    if (result?.error) {
-      setError(result.error)
-    } else {
-      closeModal()
-      Swal.fire({
-        title: 'Berhasil!',
-        text: result.success,
-        icon: 'success',
-        confirmButtonColor: '#10b981',
-        customClass: { popup: 'rounded-[2rem]' }
-      })
+      if (result?.error) {
+        setError(result.error)
+      } else {
+        closeModal()
+        Swal.fire({
+          title: 'Berhasil!',
+          text: result.success,
+          icon: 'success',
+          confirmButtonColor: '#10b981',
+          customClass: { popup: 'rounded-[2rem]' }
+        })
+      }
+    } catch (e) {
+      setError('Gagal mengupload gambar. Pastikan ukuran file sesuai.')
     }
     
     setIsLoading(false)
@@ -166,7 +168,7 @@ export default function LapanganClient({ initialData }) {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} id="lapangan-form" className="space-y-6">
+              <form action={clientAction} id="lapangan-form" className="space-y-6">
                 {(modalType === 'edit' || modalType === 'delete') && (
                   <input type="hidden" name="id_lapangan" value={selectedData?.id_lapangan} />
                 )}

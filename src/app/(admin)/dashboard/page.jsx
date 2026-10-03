@@ -8,7 +8,7 @@ async function getDashboardData() {
     const [lapangan] = await db.query('SELECT * FROM tb_daftar_lapangan')
 
     // Quick stats
-    const [users] = await db.query('SELECT COUNT(*) as total FROM tb_user')
+    const [users] = await db.query("SELECT COUNT(*) as total FROM tb_user WHERE level = '2'")
     const [bookings] = await db.query('SELECT COUNT(*) as total FROM tb_booking')
     const [revenue] = await db.query('SELECT SUM(total_bayar) as total FROM tb_bayar')
 
@@ -67,15 +67,7 @@ export default async function DashboardPage() {
           </div>
 
           <div className="hidden lg:grid grid-cols-1 gap-4 w-72">
-            <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-5 flex items-center gap-5 border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] hover:bg-white/20 transition-all cursor-default">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-inner">
-                <Trophy className="text-white" size={26} />
-              </div>
-              <div>
-                <div className="text-sm text-emerald-100 font-medium">Standar</div>
-                <div className="font-bold text-lg text-white">FIFA Quality</div>
-              </div>
-            </div>
+
             <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-5 flex items-center gap-5 border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.1)] hover:bg-white/20 transition-all cursor-default">
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-inner">
                 <Clock className="text-white" size={26} />

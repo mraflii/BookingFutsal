@@ -3,7 +3,7 @@ import { getSession } from '@/lib/session'
 
 const protectedRoutes = ['/dashboard', '/jadwal', '/booking', '/lapangan', '/user', '/report']
 
-export async function middleware(request) {
+export default async function proxy(request) {
   const path = request.nextUrl.pathname
   const isProtectedRoute = protectedRoutes.some(route => path.startsWith(route))
 
