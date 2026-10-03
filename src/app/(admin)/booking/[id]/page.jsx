@@ -2,6 +2,8 @@ import db from '@/lib/db'
 import BookingItemClient from './BookingItemClient'
 import { notFound } from 'next/navigation'
 
+import { getSession } from '@/lib/session'
+
 export async function generateMetadata({ params }) {
   return { title: `Booking ${(await params).id} - Alouh Futsal` }
 }
@@ -9,6 +11,8 @@ export async function generateMetadata({ params }) {
 export default async function BookingItemPage({ params, searchParams }) {
   const { id } = await params
   const sp = await searchParams
+  const session = await getSession()
+  const userLevel = session?.user?.level || '2'
   
   let items = []
   let bookingInfo = null
@@ -54,6 +58,7 @@ export default async function BookingItemPage({ params, searchParams }) {
         kode_booking={id}
         pelanggan={sp.pelanggan || bookingInfo?.pelanggan}
         kode_lapangan={sp.kode_lapangan || bookingInfo?.kode_lapangan}
+        userLevel={userLevel}
       />
     </div>
   )

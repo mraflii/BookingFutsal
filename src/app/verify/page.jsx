@@ -1,17 +1,19 @@
 'use client'
 
-import { useActionState } from 'react'
-import { login } from './actions'
-import { KeyRound, User, ChevronRight, Activity } from 'lucide-react'
+import { useActionState, useEffect, useState, Suspense } from 'react'
+import { verifyOTP } from './actions'
+import { KeyRound, Activity, ChevronRight, Mail } from 'lucide-react'
 import Image from 'next/image'
-import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 
 const initialState = {
   error: null,
 }
 
-export default function LoginPage() {
-  const [state, formAction, isPending] = useActionState(login, initialState)
+function VerifyForm() {
+  const [state, formAction, isPending] = useActionState(verifyOTP, initialState)
+  const searchParams = useSearchParams()
+  const emailParam = searchParams.get('email') || ''
 
   return (
     <div className="min-h-screen flex w-full bg-slate-900 overflow-hidden font-sans">
@@ -31,16 +33,16 @@ export default function LoginPage() {
             <Activity className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-5xl font-extrabold text-white tracking-tight leading-tight">
-            Tingkatkan <br/>
-            <span className="text-emerald-400">Permainanmu.</span>
+            Verifikasi <br/>
+            <span className="text-emerald-400">Akun Anda.</span>
           </h1>
           <p className="text-slate-300 text-lg leading-relaxed">
-            Sistem manajemen lapangan futsal modern untuk mengelola jadwal, pemesanan, dan laporan dengan pengalaman terbaik.
+            Satu langkah lagi untuk menyelesaikan pendaftaran Anda.
           </p>
         </div>
       </div>
 
-      {/* Right Panel - Login Form */}
+      {/* Right Panel - OTP Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 relative overflow-hidden bg-slate-900">
         
         {/* Glow Effects for Mobile/Tablet Background */}
@@ -49,8 +51,8 @@ export default function LoginPage() {
         
         <div className="w-full max-w-md relative z-10 animate-fade-in">
           <div className="mb-10 lg:mb-14 text-center lg:text-left">
-            <h2 className="text-3xl font-bold text-white mb-2">Selamat Datang 👋</h2>
-            <p className="text-slate-400">Silakan masuk ke akun Alouh Futsal Anda.</p>
+            <h2 className="text-3xl font-bold text-white mb-2">Cek Email Anda ✉️</h2>
+            <p className="text-slate-400">Kami telah mengirimkan 6-digit kode verifikasi ke <strong>{emailParam || 'email Anda'}</strong>. Silakan masukkan kode tersebut di bawah ini.</p>
           </div>
 
           <form action={formAction} className="space-y-6">
@@ -61,35 +63,23 @@ export default function LoginPage() {
               </div>
             )}
 
+            <input type="hidden" name="email" value={emailParam} />
+
             <div className="space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-300 ml-1">Username / Email</label>
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors group-focus-within:text-emerald-400 text-slate-500">
-                    <User className="h-5 w-5" />
-                  </div>
-                  <input 
-                    type="text" 
-                    name="username" 
-                    required
-                    className="block w-full pl-12 pr-4 py-4 bg-slate-800/50 border border-slate-700/50 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 focus:bg-slate-800 transition-all shadow-inner"
-                    placeholder="Masukkan username atau email"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-300 ml-1">Password</label>
+                <label className="text-sm font-medium text-slate-300 ml-1">Kode Verifikasi (OTP)</label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors group-focus-within:text-emerald-400 text-slate-500">
                     <KeyRound className="h-5 w-5" />
                   </div>
                   <input 
-                    type="password" 
-                    name="password" 
+                    type="text" 
+                    name="code" 
                     required
-                    className="block w-full pl-12 pr-4 py-4 bg-slate-800/50 border border-slate-700/50 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 focus:bg-slate-800 transition-all shadow-inner"
-                    placeholder="••••••••"
+                    maxLength={6}
+                    autoComplete="off"
+                    className="block w-full pl-12 pr-4 py-4 bg-slate-800/50 border border-slate-700/50 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 focus:bg-slate-800 transition-all shadow-inner text-2xl font-bold tracking-[1em]"
+                    placeholder="------"
                   />
                 </div>
               </div>
@@ -103,26 +93,16 @@ export default function LoginPage() {
               {isPending ? (
                 <div className="flex items-center gap-2 relative z-10">
                   <div className="w-5 h-5 border-2 border-slate-900/30 border-t-slate-900 rounded-full animate-spin" />
-                  <span>Memproses...</span>
+                  <span>Memverifikasi...</span>
                 </div>
               ) : (
                 <div className="flex items-center gap-2 relative z-10">
-                  <span>Masuk ke Dashboard</span>
+                  <span>Verifikasi Akun</span>
                   <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </div>
               )}
-              {/* Button shine effect */}
               <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
             </button>
-            
-            <div className="text-center mt-6">
-              <p className="text-slate-400 text-sm">
-                Belum punya akun?{' '}
-                <Link href="/register" className="text-emerald-400 hover:text-emerald-300 font-medium transition-colors">
-                  Daftar di sini
-                </Link>
-              </p>
-            </div>
           </form>
           
           <div className="mt-8 text-center text-sm text-slate-500">
@@ -131,5 +111,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-900 flex items-center justify-center text-emerald-400">Loading...</div>}>
+      <VerifyForm />
+    </Suspense>
   )
 }

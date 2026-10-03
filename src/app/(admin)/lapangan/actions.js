@@ -11,6 +11,10 @@ const UPLOAD_DIR = path.join(process.cwd(), 'public/assets/img')
 export async function addLapangan(prevState, formData) {
   const nama = formData.get('nama_lapangan')
   const harga = formData.get('harga')
+  const harga_malam = formData.get('harga_malam') || null
+  const harga_weekend = formData.get('harga_weekend') || null
+  const jenis_lantai = formData.get('jenis_lantai') || null
+  const fasilitas = formData.get('fasilitas') || null
   const file = formData.get('foto')
 
   if (!nama || !harga || !file || file.size === 0) {
@@ -44,8 +48,8 @@ export async function addLapangan(prevState, formData) {
     // Save to DB
     const id_lapangan = 'LAP' + Math.floor(Math.random() * 90000)
     await db.query(
-      'INSERT INTO tb_daftar_lapangan (id_lapangan, foto, nama_lapangan, harga) VALUES (?, ?, ?, ?)',
-      [id_lapangan, filename, nama, harga]
+      'INSERT INTO tb_daftar_lapangan (id_lapangan, foto, nama_lapangan, harga, harga_malam, harga_weekend, jenis_lantai, fasilitas) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [id_lapangan, filename, nama, harga, harga_malam, harga_weekend, jenis_lantai, fasilitas]
     )
     
     revalidatePath('/lapangan')
@@ -61,6 +65,10 @@ export async function editLapangan(prevState, formData) {
   const id = formData.get('id_lapangan')
   const nama = formData.get('nama_lapangan')
   const harga = formData.get('harga')
+  const harga_malam = formData.get('harga_malam') || null
+  const harga_weekend = formData.get('harga_weekend') || null
+  const jenis_lantai = formData.get('jenis_lantai') || null
+  const fasilitas = formData.get('fasilitas') || null
   const file = formData.get('foto')
   const oldFoto = formData.get('old_foto')
 
@@ -93,8 +101,8 @@ export async function editLapangan(prevState, formData) {
     }
 
     await db.query(
-      'UPDATE tb_daftar_lapangan SET nama_lapangan = ?, harga = ?, foto = ? WHERE id_lapangan = ?',
-      [nama, harga, filename, id]
+      'UPDATE tb_daftar_lapangan SET nama_lapangan = ?, harga = ?, harga_malam = ?, harga_weekend = ?, jenis_lantai = ?, fasilitas = ?, foto = ? WHERE id_lapangan = ?',
+      [nama, harga, harga_malam, harga_weekend, jenis_lantai, fasilitas, filename, id]
     )
 
     revalidatePath('/lapangan')

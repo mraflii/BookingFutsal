@@ -207,11 +207,24 @@ export default function LapanganClient({ initialData }) {
                       </div>
                       
                       <div className="space-y-3">
-                        <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Harga Sewa (Per Jam)</label>
+                        <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Jenis Lantai</label>
+                        <select 
+                          name="jenis_lantai" 
+                          defaultValue={selectedData?.jenis_lantai || 'Rumput Sintetis'}
+                          disabled={modalType === 'view'}
+                          className="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all disabled:opacity-70 text-slate-800 font-medium appearance-none"
+                        >
+                          <option value="Rumput Sintetis">Rumput Sintetis</option>
+                          <option value="Vinyl">Vinyl</option>
+                          <option value="Interlock">Interlock</option>
+                          <option value="Semen">Semen</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-3">
+                        <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Harga Reguler (Siang)</label>
                         <div className="relative">
-                          <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 font-bold">
-                            Rp
-                          </div>
+                          <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 font-bold">Rp</div>
                           <input 
                             type="number" 
                             name="harga" 
@@ -222,6 +235,48 @@ export default function LapanganClient({ initialData }) {
                             placeholder="100000"
                           />
                         </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Harga Malam (18:00+)</label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 font-bold">Rp</div>
+                          <input 
+                            type="number" 
+                            name="harga_malam" 
+                            defaultValue={selectedData?.harga_malam}
+                            disabled={modalType === 'view'}
+                            className="w-full pl-12 pr-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all disabled:opacity-70 text-slate-800 font-medium"
+                            placeholder="120000 (Opsional)"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Harga Weekend</label>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 font-bold">Rp</div>
+                          <input 
+                            type="number" 
+                            name="harga_weekend" 
+                            defaultValue={selectedData?.harga_weekend}
+                            disabled={modalType === 'view'}
+                            className="w-full pl-12 pr-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all disabled:opacity-70 text-slate-800 font-medium"
+                            placeholder="150000 (Opsional)"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Fasilitas Tambahan</label>
+                        <input 
+                          type="text" 
+                          name="fasilitas" 
+                          defaultValue={selectedData?.fasilitas}
+                          disabled={modalType === 'view'}
+                          className="w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all disabled:opacity-70 text-slate-800 font-medium"
+                          placeholder="Bola, Papan Skor, Rompi"
+                        />
                       </div>
 
                       <div className="space-y-3 md:col-span-2">

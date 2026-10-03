@@ -4,11 +4,11 @@ import { useState } from 'react'
 import { Plus, Edit, Trash2, X, ArrowLeft, CreditCard, CheckCircle, Ticket, Map, Clock, CalendarDays, Wallet, User } from 'lucide-react'
 import Link from 'next/link'
 import Swal from 'sweetalert2'
-import { addBookingItem, editBookingItem, deleteBookingItem, bayarBooking } from './actions'
+import { addBookingItem, editBookingItem, deleteBookingItem, bayarBooking, getMidtransToken } from './actions'
 
 const JAM_OPTIONS = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00','23:00','00:00','01:00','02:00','03:00']
 
-export default function BookingItemClient({ bookingInfo, items, total, kode_booking, pelanggan, kode_lapangan }) {
+export default function BookingItemClient({ bookingInfo, items, total, kode_booking, pelanggan, kode_lapangan, userLevel }) {
   const [modalType, setModalType] = useState(null)
   const [selectedData, setSelectedData] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -29,10 +29,52 @@ export default function BookingItemClient({ bookingInfo, items, total, kode_book
     else if (modalType === 'edit') result = await editBookingItem(null, formData)
     else if (modalType === 'delete') result = await deleteBookingItem(null, formData)
     else if (modalType === 'bayar') result = await bayarBooking(null, formData)
+    else if (modalType === 'bayar_transfer') {
+      // Get snap token
+      const tokenRes = await getMidtransToken(kode_booking, total, pelanggan)
+      if (tokenRes.error) {
+        setError(tokenRes.error)
+        setIsLoading(false)
+        return
+      }
+      
+      // Pay with snap
+      window.snap.pay(tokenRes.token, {
+        onSuccess: async function(snapResult){
+          // Auto submit the payment to DB upon success
+          const payRes = await bayarBooking(null, formData)
+          if (payRes.error) setError(payRes.error)
+          else {
+            closeModal()
+            Swal.fire({
+              title: 'Pembayaran Sukses!',
+              text: 'Pembayaran Midtrans berhasil, booking dilunasi.',
+              icon: 'success',
+              confirmButtonColor: '#10b981',
+              customClass: { popup: 'rounded-[2rem]' }
+            })
+          }
+          setIsLoading(false)
+        },
+        onPending: function(result){
+          setError('Pembayaran masih pending atau belum selesai.')
+          setIsLoading(false)
+        },
+        onError: function(result){
+          setError('Pembayaran gagal.')
+          setIsLoading(false)
+        },
+        onClose: function(){
+          setIsLoading(false)
+        }
+      })
+      
+      return // Wait for snap callback
+    }
 
     if (result?.error) {
       setError(result.error)
-    } else {
+    } else if (result?.success) {
       closeModal()
       Swal.fire({
         title: 'Berhasil!',
@@ -64,9 +106,16 @@ export default function BookingItemClient({ bookingInfo, items, total, kode_book
               </div>
             </div>
           </div>
-          <div>
+          <div className="flex items-center gap-3">
             {isPaid
-              ? <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl shadow-sm"><CheckCircle size={20} className="text-emerald-500" /> <span className="font-bold">Pembayaran Lunas</span></div>
+              ? (
+                  <>
+                    <Link target="_blank" href={`/invoice/${kode_booking}`} className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl shadow-sm transition-all font-bold">
+                      <Ticket size={20} /> Unduh Tiket
+                    </Link>
+                    <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl shadow-sm"><CheckCircle size={20} className="text-emerald-500" /> <span className="font-bold">Lunas</span></div>
+                  </>
+                )
               : <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-50 border border-amber-100 text-amber-700 rounded-2xl shadow-sm"><Clock size={20} className="text-amber-500" /> <span className="font-bold">Menunggu Pembayaran</span></div>
             }
           </div>
@@ -101,9 +150,16 @@ export default function BookingItemClient({ bookingInfo, items, total, kode_book
                 <Plus size={18} /> Tambah Sesi
               </button>
               {items.length > 0 && (
-                <button onClick={() => openModal('bayar')} className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-600 hover:to-indigo-600 text-white px-5 py-3 rounded-2xl text-sm font-bold transition-all shadow-[0_4px_12px_rgba(14,165,233,0.3)] hover:shadow-[0_8px_20px_rgba(14,165,233,0.4)] hover:-translate-y-0.5">
-                  <CreditCard size={18} /> Konfirmasi Bayar
-                </button>
+                <>
+                  <button onClick={() => openModal('bayar_transfer')} className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-600 hover:to-indigo-600 text-white px-5 py-3 rounded-2xl text-sm font-bold transition-all shadow-[0_4px_12px_rgba(14,165,233,0.3)] hover:shadow-[0_8px_20px_rgba(14,165,233,0.4)] hover:-translate-y-0.5">
+                    <CreditCard size={18} /> Via Transfer / Online
+                  </button>
+                  {userLevel === '1' && (
+                    <button onClick={() => openModal('bayar')} className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-3 rounded-2xl text-sm font-bold transition-all shadow-md shadow-emerald-500/20 hover:-translate-y-0.5">
+                      <Wallet size={18} /> Bayar Cash
+                    </button>
+                  )}
+                </>
               )}
             </div>
           )}
@@ -177,7 +233,8 @@ export default function BookingItemClient({ bookingInfo, items, total, kode_book
                 {modalType === 'add' && 'Tambah Sesi Main'}
                 {modalType === 'edit' && 'Edit Sesi Main'}
                 {modalType === 'delete' && 'Hapus Sesi Main'}
-                {modalType === 'bayar' && 'Konfirmasi Pembayaran'}
+                {modalType === 'bayar' && 'Konfirmasi Pembayaran Cash'}
+                {modalType === 'bayar_transfer' && 'Bayar Online via Midtrans'}
               </h3>
               <button onClick={closeModal} className="text-slate-400 hover:text-slate-700 transition-colors p-2 bg-white hover:bg-slate-100 rounded-full shadow-sm border border-slate-200">
                 <X size={20} />
@@ -196,7 +253,7 @@ export default function BookingItemClient({ bookingInfo, items, total, kode_book
                 <input type="hidden" name="kode_booking" value={kode_booking} />
                 {(modalType === 'edit' || modalType === 'delete') && <input type="hidden" name="id" value={selectedData?.id_list_booking} />}
 
-                {modalType === 'bayar' && (
+                {(modalType === 'bayar' || modalType === 'bayar_transfer') && (
                   <>
                     <input type="hidden" name="total" value={total} />
                     <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200 mb-6 text-center shadow-inner">
@@ -204,7 +261,7 @@ export default function BookingItemClient({ bookingInfo, items, total, kode_book
                       <p className="text-4xl font-extrabold text-emerald-600">Rp {total.toLocaleString('id-ID')}</p>
                     </div>
                     <p className="text-slate-600 text-lg leading-relaxed text-center">
-                      Anda akan mengkonfirmasi pembayaran tunai untuk booking <b>{kode_booking}</b> atas nama <b>{pelanggan}</b>.
+                      Anda akan mengkonfirmasi pembayaran {modalType === 'bayar' ? <b>tunai</b> : <b>online (transfer)</b>} untuk booking <b>{kode_booking}</b> atas nama <b>{pelanggan}</b>.
                     </p>
                   </>
                 )}
@@ -263,12 +320,12 @@ export default function BookingItemClient({ bookingInfo, items, total, kode_book
                 className={`px-8 py-3.5 rounded-2xl font-bold text-white transition-all shadow-lg flex items-center gap-2 hover:-translate-y-0.5 ${
                   modalType === 'delete' 
                     ? 'bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 shadow-red-500/30' 
-                    : modalType === 'bayar' 
+                    : modalType === 'bayar_transfer'
                     ? 'bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-600 hover:to-indigo-600 shadow-[0_8px_20px_rgba(14,165,233,0.3)]' 
                     : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 shadow-emerald-500/30'
                 }`}
               >
-                {isLoading ? <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Memproses...</> : <>{modalType === 'delete' ? 'Ya, Hapus Data' : modalType === 'bayar' ? 'Konfirmasi Bayar' : 'Simpan Data'}</>}
+                {isLoading ? <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Memproses...</> : <>{modalType === 'delete' ? 'Ya, Hapus Data' : (modalType === 'bayar' || modalType === 'bayar_transfer') ? 'Lanjutkan Pembayaran' : 'Simpan Data'}</>}
               </button>
             </div>
           </div>

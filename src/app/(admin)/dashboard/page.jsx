@@ -1,7 +1,8 @@
 import db from '@/lib/db'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, Trophy, Clock, ShieldCheck, Users, Ticket, Wallet } from 'lucide-react'
+import { ArrowRight, Trophy, Clock, ShieldCheck, Users, Ticket, Wallet, Activity, MapPin } from 'lucide-react'
+import { getSession } from '@/lib/session'
 
 async function getDashboardData() {
   try {
@@ -27,8 +28,196 @@ async function getDashboardData() {
 }
 
 export default async function DashboardPage() {
+  const session = await getSession()
+  const userLevel = session?.user?.level || '2'
   const { lapangan, stats } = await getDashboardData()
 
+  // Tampilan untuk User Biasa (Level 2) - Tentang Website
+  if (userLevel === '2') {
+    return (
+      <div className="space-y-16 pb-16 animate-fade-in-up">
+        {/* Premium Hero Section */}
+        <div className="relative overflow-hidden rounded-[3rem] bg-slate-900 text-white shadow-2xl group">
+          <Image 
+            src="/login-bg.png" 
+            alt="Futsal Background"
+            fill
+            className="object-cover opacity-30 mix-blend-luminosity group-hover:scale-105 group-hover:opacity-40 transition-all duration-[2s] ease-in-out"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/80 to-slate-900/20" />
+          
+          <div className="relative z-10 px-6 py-20 md:py-28 flex flex-col items-center text-center max-w-5xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-bold mb-8 backdrop-blur-md">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+              </span>
+              Booking Futsal Modern
+            </div>
+            
+            <h1 className="text-5xl md:text-6xl lg:text-8xl font-extrabold tracking-tight mb-8 leading-[1.1]">
+              Tingkatkan <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-200">
+                Permainanmu.
+              </span>
+            </h1>
+            
+            <p className="text-slate-300 text-lg md:text-2xl mb-12 leading-relaxed max-w-3xl font-light">
+              Fasilitas lapangan futsal premium dengan standar kualitas terbaik, 
+              untuk Anda dan tim meraih kemenangan di setiap pertandingan.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row justify-center gap-5">
+              <Link
+                href="/booking"
+                className="group/btn relative inline-flex items-center justify-center gap-3 bg-emerald-500 text-slate-950 px-10 py-5 rounded-2xl font-bold shadow-[0_0_40px_rgba(16,185,129,0.3)] hover:shadow-[0_0_60px_rgba(16,185,129,0.5)] hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+              >
+                <span className="relative z-10 flex items-center gap-2 text-lg">
+                  Mulai Booking
+                  <ArrowRight size={22} className="group-hover/btn:translate-x-1 transition-transform" />
+                </span>
+                <div className="absolute inset-0 -translate-x-full group-hover/btn:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent z-0" />
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Premium Features Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-4">
+          <div className="bg-white/50 backdrop-blur-xl rounded-[2.5rem] p-10 text-center shadow-sm border border-slate-200/60 hover:shadow-2xl hover:shadow-teal-500/5 hover:-translate-y-2 transition-all duration-500 group">
+            <div className="w-20 h-20 rounded-[1.5rem] bg-gradient-to-br from-emerald-50 to-teal-100 text-emerald-600 flex items-center justify-center mx-auto mb-8 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-inner">
+              <Activity size={36} strokeWidth={2.5} />
+            </div>
+            <h3 className="text-2xl font-bold text-slate-800 mb-4">Pemesanan Mudah</h3>
+            <p className="text-slate-500 leading-relaxed text-lg">
+              Booking lapangan hanya dengan beberapa kali klik kapanpun dan dimanapun tanpa perlu datang ke lokasi.
+            </p>
+          </div>
+          
+          <div className="bg-white/50 backdrop-blur-xl rounded-[2.5rem] p-10 text-center shadow-sm border border-slate-200/60 hover:shadow-2xl hover:shadow-emerald-500/5 hover:-translate-y-2 transition-all duration-500 group">
+            <div className="w-20 h-20 rounded-[1.5rem] bg-gradient-to-br from-teal-50 to-emerald-100 text-teal-600 flex items-center justify-center mx-auto mb-8 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-500 shadow-inner">
+              <Clock size={36} strokeWidth={2.5} />
+            </div>
+            <h3 className="text-2xl font-bold text-slate-800 mb-4">Buka Setiap Hari</h3>
+            <p className="text-slate-500 leading-relaxed text-lg">
+              Kami siap melayani hobi futsal Anda setiap hari. Buka mulai pukul 08:00 pagi hingga 03:00 dini hari.
+            </p>
+          </div>
+          
+          <div className="bg-white/50 backdrop-blur-xl rounded-[2.5rem] p-10 text-center shadow-sm border border-slate-200/60 hover:shadow-2xl hover:shadow-blue-500/5 hover:-translate-y-2 transition-all duration-500 group">
+            <div className="w-20 h-20 rounded-[1.5rem] bg-gradient-to-br from-blue-50 to-indigo-100 text-blue-600 flex items-center justify-center mx-auto mb-8 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-inner">
+              <MapPin size={36} strokeWidth={2.5} />
+            </div>
+            <h3 className="text-2xl font-bold text-slate-800 mb-4">Lokasi Strategis</h3>
+            <p className="text-slate-500 leading-relaxed text-lg">
+              Terletak di pusat kota yang mudah dijangkau dari berbagai arah, dilengkapi fasilitas parkiran yang luas.
+            </p>
+          </div>
+        </div>
+
+        {/* Premium List Lapangan */}
+        <div className="px-2">
+          <div className="flex flex-col items-center justify-center mb-12 text-center">
+            <h2 className="text-4xl font-extrabold text-slate-800 tracking-tight mb-4">Pilih Lapangan Anda</h2>
+            <p className="text-slate-500 text-lg max-w-2xl">Jelajahi daftar lapangan premium kami dan tentukan arena yang tepat untuk pertandingan Anda berikutnya.</p>
+          </div>
+          
+          {lapangan.length > 0 ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+              {lapangan.map((lap) => (
+                <div key={lap.id_lapangan} className="bg-white rounded-[2.5rem] overflow-hidden shadow-sm border border-slate-100 hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-500 group flex flex-col md:flex-row hover:-translate-y-2">
+                  <div className="relative w-full md:w-2/5 h-72 md:h-auto overflow-hidden bg-slate-900">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-slate-900/50 z-10 hidden md:block" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent z-10 md:hidden" />
+                    {lap.foto ? (
+                      <img
+                        src={`/assets/img/${lap.foto}`}
+                        alt={lap.nama_lapangan}
+                        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700 ease-out"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-slate-700 bg-slate-800">
+                        <Trophy size={64} className="opacity-20" />
+                      </div>
+                    )}
+
+                    <div className="absolute top-5 left-5 z-20">
+                      <span className="px-4 py-1.5 bg-emerald-500/90 backdrop-blur-md text-white font-bold text-xs uppercase tracking-wider rounded-full shadow-lg border border-emerald-400/30">
+                        Tersedia
+                      </span>
+                    </div>
+                  </div>
+                  
+                    <div className="p-8 md:p-10 flex-1 flex flex-col justify-center bg-white relative">
+                      <div className="flex items-center gap-3 mb-3">
+                        <h3 className="text-3xl font-bold text-slate-800">{lap.nama_lapangan}</h3>
+                        {lap.jenis_lantai && (
+                          <span className="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg border border-slate-200">
+                            {lap.jenis_lantai}
+                          </span>
+                        )}
+                      </div>
+                      
+                      <p className="text-slate-500 text-base mb-6 leading-relaxed">
+                        {lap.fasilitas ? `Fasilitas: ${lap.fasilitas}` : `Nikmati pengalaman bermain terbaik dengan fasilitas lengkap dan kenyamanan maksimal di ${lap.nama_lapangan}.`}
+                      </p>
+                      
+                      <div className="mt-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 border-t border-slate-100 pt-6">
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-end gap-2">
+                            <div className="text-2xl font-black text-emerald-600">
+                              Rp {Number(lap.harga).toLocaleString('id-ID')}
+                            </div>
+                            <span className="text-slate-400 text-sm font-medium mb-1">/jam (Reguler)</span>
+                          </div>
+                          
+                          {(lap.harga_malam || lap.harga_weekend) && (
+                            <div className="flex flex-col gap-1 mt-2">
+                              {lap.harga_malam && (
+                                <div className="text-xs font-semibold text-slate-500 flex items-center justify-between bg-slate-50 px-3 py-1.5 rounded-md border border-slate-100">
+                                  <span>Malam (18:00+)</span>
+                                  <span className="text-amber-600 font-bold">Rp {Number(lap.harga_malam).toLocaleString('id-ID')}</span>
+                                </div>
+                              )}
+                              {lap.harga_weekend && (
+                                <div className="text-xs font-semibold text-slate-500 flex items-center justify-between bg-slate-50 px-3 py-1.5 rounded-md border border-slate-100">
+                                  <span>Weekend (Sab-Min)</span>
+                                  <span className="text-indigo-600 font-bold">Rp {Number(lap.harga_weekend).toLocaleString('id-ID')}</span>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        
+                        <Link
+                          href="/booking"
+                          className="w-full sm:w-auto px-8 py-4 bg-slate-900 text-white hover:bg-emerald-500 font-bold text-center rounded-2xl transition-all duration-300 shadow-xl shadow-slate-900/10 hover:shadow-emerald-500/20 relative overflow-hidden group/btn"
+                        >
+                          <span className="relative z-10 flex items-center justify-center gap-2">
+                            Booking
+                            <ArrowRight size={18} className="group-hover/btn:translate-x-1 transition-transform" />
+                          </span>
+                        </Link>
+                      </div>
+                    </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-24 bg-white rounded-[3rem] border border-slate-200 border-dashed shadow-sm">
+              <div className="inline-flex w-24 h-24 bg-slate-50 text-slate-400 rounded-full items-center justify-center mb-6 shadow-inner">
+                <ShieldCheck size={48} strokeWidth={1.5} />
+              </div>
+              <h3 className="text-2xl font-bold text-slate-800 mb-3">Belum ada lapangan</h3>
+              <p className="text-slate-500 max-w-sm mx-auto text-lg">Data lapangan belum tersedia. Silakan hubungi admin untuk informasi lebih lanjut.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // Tampilan untuk Admin (Level 1) - Analitik
   return (
     <div className="space-y-8 pb-8 animate-fade-in-up">
       {/* Hero Section */}

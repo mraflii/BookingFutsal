@@ -1,6 +1,7 @@
 import db from '@/lib/db'
 import Link from 'next/link'
 import { Eye, FileBarChart2, Wallet, CalendarDays, TrendingUp } from 'lucide-react'
+import ReportExportButton from './ReportExportButton'
 
 export const metadata = { title: 'Laporan - Alouh Futsal' }
 
@@ -46,6 +47,7 @@ export default async function ReportPage() {
           <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">Laporan Keuangan</h1>
           <p className="text-slate-500 mt-1">Histori transaksi dan ringkasan pendapatan fustal.</p>
         </div>
+        <ReportExportButton reports={reports} />
       </div>
 
       {/* Summary Cards */}

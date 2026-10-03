@@ -220,6 +220,30 @@ export default function BookingClient({ initialData, lapangan }) {
                       <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Nama Pelanggan (Pemesan)</label>
                       <input type="text" name="pelanggan" defaultValue={selectedData?.pelanggan} required className={inputClass} placeholder="Contoh: Tim Futsal Jaya" />
                     </div>
+                    {modalType === 'add' && (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-slate-100 mt-4">
+                        <div className="space-y-3">
+                          <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Tanggal Main</label>
+                          <input type="date" name="tanggal_main" required className={inputClass} min={new Date().toISOString().slice(0,10)} />
+                        </div>
+                        <div className="space-y-3">
+                          <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Jam Main</label>
+                          <div className="relative">
+                            <select name="jam_main" required className={`${inputClass} appearance-none`}>
+                              <option value="" disabled selected hidden>Pilih</option>
+                              {JAM_OPTIONS.map(j => <option key={j} value={j}>{j}</option>)}
+                            </select>
+                            <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-slate-400">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="space-y-3">
+                          <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Durasi (Jam)</label>
+                          <input type="number" name="durasi" required min="1" max="10" defaultValue="1" className={inputClass} />
+                        </div>
+                      </div>
+                    )}
                   </>
                 )}
               </form>
