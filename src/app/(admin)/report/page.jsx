@@ -2,11 +2,13 @@ import db from '@/lib/db'
 import Link from 'next/link'
 import { Eye, FileBarChart2, Wallet, CalendarDays, TrendingUp } from 'lucide-react'
 import ReportExportButton from './ReportExportButton'
+import ReportAnalyticsClient from './ReportAnalyticsClient'
 
-export const metadata = { title: 'Laporan - Alouh Futsal' }
+export const metadata = { title: 'Laporan & Analisis - Alouh Futsal' }
 
 export default async function ReportPage() {
   let reports = []
+  let rawItems = []
   let totalPendapatan = 0
   let pendapatanBulanIni = 0
 
@@ -18,7 +20,7 @@ export default async function ReportPage() {
     const [rows] = await db.query(`
       SELECT tb_booking.id_booking, tb_booking.pelanggan, tb_booking.kode_lapangan,
              tb_booking.waktu_booking, tb_daftar_lapangan.nama_lapangan,
-             tb_bayar.total_bayar, tb_bayar.waktu_bayar
+             tb_bayar.total_bayar, tb_bayar.waktu_bayar, tb_bayar.jenis_bayar, tb_bayar.sisa_bayar
       FROM tb_booking
       LEFT JOIN tb_daftar_lapangan ON tb_daftar_lapangan.id_lapangan = tb_booking.kode_lapangan
       LEFT JOIN tb_bayar ON tb_bayar.id_bayar = tb_booking.id_booking
@@ -35,6 +37,14 @@ export default async function ReportPage() {
       }
       return sum
     }, 0)
+
+    // Ambil item sesi untuk analisis siang vs malam
+    const [items] = await db.query(`
+      SELECT jam_main, durasi, (harga * durasi) AS subtotal
+      FROM tb_list_booking
+      JOIN tb_bayar ON tb_bayar.id_bayar = tb_list_booking.kode_booking
+    `)
+    rawItems = items
     
   } catch (error) {
     console.error('Error fetching reports:', error)
@@ -42,13 +52,16 @@ export default async function ReportPage() {
 
   return (
     <div className="animate-fade-in-up">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">Laporan Keuangan</h1>
-          <p className="text-slate-500 mt-1">Histori transaksi dan ringkasan pendapatan fustal.</p>
+          <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">Laporan & Analisis Keuangan</h1>
+          <p className="text-slate-500 mt-1">Histori transaksi, visualisasi tren omzet, dan performa lapangan futsal.</p>
         </div>
         <ReportExportButton reports={reports} />
       </div>
+
+      {/* Komponen Visual Grafik & Analitik */}
+      <ReportAnalyticsClient reports={reports} rawItems={rawItems} />
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -71,35 +84,61 @@ export default async function ReportPage() {
           </div>
         </div>
         
-        <div className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] group">
+        <div className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] group flex flex-col justify-between">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-12 h-12 bg-sky-50 rounded-2xl flex items-center justify-center border border-sky-100 group-hover:bg-sky-500 group-hover:text-white transition-colors duration-300">
               <CalendarDays size={24} className="text-sky-500 group-hover:text-white transition-colors duration-300" />
             </div>
-            <p className="font-bold text-slate-500 uppercase tracking-wide text-sm">Bulan Ini</p>
+            <p className="font-bold text-slate-500 uppercase tracking-wide text-sm">Pendapatan Bulan Ini</p>
           </div>
-          <p className="text-3xl font-extrabold text-slate-800 tracking-tight">Rp {pendapatanBulanIni.toLocaleString('id-ID')}</p>
+          <div>
+            <p className="text-3xl font-extrabold text-slate-800 tracking-tight">Rp {pendapatanBulanIni.toLocaleString('id-ID')}</p>
+            <p className="text-xs text-slate-400 mt-1">Bulan {now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' })}</p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] group flex flex-col justify-between">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center border border-indigo-100 group-hover:bg-indigo-500 group-hover:text-white transition-colors duration-300">
+              <TrendingUp size={24} className="text-indigo-500 group-hover:text-white transition-colors duration-300" />
+            </div>
+            <p className="font-bold text-slate-500 uppercase tracking-wide text-sm">Status Transaksi</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex-1 p-3 bg-emerald-50 rounded-xl border border-emerald-100">
+              <span className="text-[11px] font-bold text-emerald-600 block uppercase">Lunas</span>
+              <span className="text-xl font-black text-emerald-700">{reports.filter(r => (r.jenis_bayar || 'LUNAS') === 'LUNAS').length}</span>
+            </div>
+            <div className="flex-1 p-3 bg-sky-50 rounded-xl border border-sky-100">
+              <span className="text-[11px] font-bold text-sky-600 block uppercase">Uang Muka (DP)</span>
+              <span className="text-xl font-black text-sky-700">{reports.filter(r => r.jenis_bayar === 'DP').length}</span>
+            </div>
+          </div>
         </div>
       </div>
 
       <div className="bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden">
+        <div className="p-6 border-b border-slate-100">
+          <h2 className="text-xl font-bold text-slate-800">Riwayat Pembayaran & Transaksi</h2>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/50 border-b border-slate-100 text-xs font-bold text-slate-400 uppercase tracking-widest">
-                <th className="p-6 w-20 text-center rounded-tl-[2rem]">No</th>
+                <th className="p-6 w-20 text-center">No</th>
                 <th className="p-6">Kode Booking</th>
                 <th className="p-6">Pelanggan</th>
                 <th className="p-6">Lapangan</th>
                 <th className="p-6">Waktu Transaksi</th>
-                <th className="p-6">Total Bayar</th>
-                <th className="p-6 text-center rounded-tr-[2rem]">Detail</th>
+                <th className="p-6">Status Bayar</th>
+                <th className="p-6">Total Diterima</th>
+                <th className="p-6 text-center">Detail</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
               {reports.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="p-12 text-center text-slate-400">
+                  <td colSpan="8" className="p-12 text-center text-slate-400">
                     Belum ada laporan pembayaran.
                   </td>
                 </tr>
@@ -117,6 +156,17 @@ export default async function ReportPage() {
                         <span className="text-sm font-bold text-slate-700">{row.waktu_bayar ? new Date(row.waktu_bayar).toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric'}) : '-'}</span>
                         <span className="text-xs font-medium text-slate-400">{row.waktu_bayar ? new Date(row.waktu_bayar).toLocaleTimeString('id-ID') : '-'}</span>
                       </div>
+                    </td>
+                    <td className="p-6">
+                      {row.jenis_bayar === 'DP' ? (
+                        <span className="inline-flex items-center px-3 py-1 bg-sky-50 text-sky-700 text-xs font-bold rounded-full border border-sky-200">
+                          DP 50%
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-full border border-emerald-200">
+                          Lunas
+                        </span>
+                      )}
                     </td>
                     <td className="p-6">
                       <span className="inline-flex items-center px-4 py-1.5 bg-emerald-50 text-emerald-700 font-bold text-sm rounded-full border border-emerald-100">

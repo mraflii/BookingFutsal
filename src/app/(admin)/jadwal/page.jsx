@@ -1,9 +1,13 @@
 import db from '@/lib/db'
+import { getSession } from '@/lib/session'
 import JadwalClient from './JadwalClient'
 
 export const metadata = { title: 'Cek Ketersediaan Jadwal - Alouh Futsal' }
 
 export default async function JadwalPage() {
+  const session = await getSession()
+  const user = session?.user
+
   let jadwal = []
   let lapangan = []
 
@@ -14,7 +18,8 @@ export default async function JadwalPage() {
     const [rows] = await db.query(`
       SELECT tb_list_booking.id_list_booking, tb_list_booking.kode_booking, tb_list_booking.tanggal_main, 
              tb_list_booking.jam_main, tb_list_booking.durasi, tb_list_booking.harga,
-             tb_booking.pelanggan, tb_booking.kode_lapangan, tb_booking.waktu_booking, tb_bayar.id_bayar
+             tb_booking.pelanggan, tb_booking.kode_lapangan, tb_booking.waktu_booking, 
+             tb_bayar.id_bayar, tb_bayar.jenis_bayar, tb_bayar.sisa_bayar, tb_bayar.total_bayar
       FROM tb_list_booking
       JOIN tb_booking ON tb_booking.id_booking = tb_list_booking.kode_booking
       LEFT JOIN tb_bayar ON tb_bayar.id_bayar = tb_booking.id_booking
@@ -27,7 +32,7 @@ export default async function JadwalPage() {
       tanggal_main: r.tanggal_main ? r.tanggal_main.toISOString().slice(0, 10) : null
     }))
 
-    const [lapRows] = await db.query('SELECT id_lapangan, nama_lapangan FROM tb_daftar_lapangan')
+    const [lapRows] = await db.query('SELECT * FROM tb_daftar_lapangan')
     lapangan = lapRows
   } catch (error) {
     console.error('Error fetching jadwal:', error)
@@ -42,7 +47,12 @@ export default async function JadwalPage() {
         </div>
       </div>
 
-      <JadwalClient initialJadwal={jadwal} lapanganList={lapangan} />
+      <JadwalClient 
+        initialJadwal={jadwal} 
+        lapanganList={lapangan} 
+        currentUser={user} 
+        userLevel={user?.level || '2'} 
+      />
     </div>
   )
 }

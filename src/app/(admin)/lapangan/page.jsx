@@ -16,14 +16,7 @@ export default async function LapanganPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">Master Data Lapangan</h1>
-          <p className="text-slate-500 text-sm mt-1">Kelola data lapangan yang tersedia untuk disewa.</p>
-        </div>
-      </div>
-      
+    <div>
       <LapanganClient initialData={lapangan} />
     </div>
   )

@@ -6,7 +6,7 @@ import Link from 'next/link'
 import Swal from 'sweetalert2'
 import { addBooking, editBooking, deleteBooking } from './actions'
 
-const JAM_OPTIONS = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00','23:00','00:00','01:00','02:00','03:00']
+const JAM_OPTIONS = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','20:00','21:00','22:00','23:00','00:00','01:00','02:00','03:00']
 
 function generateKode() {
   const now = new Date()
@@ -14,7 +14,8 @@ function generateKode() {
   return `${String(now.getFullYear()).slice(2)}${pad(now.getMonth()+1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${Math.floor(100 + Math.random()*900)}`
 }
 
-export default function BookingClient({ initialData, lapangan }) {
+export default function BookingClient({ initialData, lapangan, userLevel = '1', currentUser = null }) {
+  const isCustomer = userLevel === '2'
   const [modalType, setModalType] = useState(null)
   const [selectedData, setSelectedData] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -67,8 +68,12 @@ export default function BookingClient({ initialData, lapangan }) {
     <div className="animate-fade-in-up">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">Data Booking</h1>
-          <p className="text-slate-500 mt-1">Kelola data pemesanan dan pembayaran lapangan.</p>
+          <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">
+            {isCustomer ? 'Pesanan Saya' : 'Data Booking'}
+          </h1>
+          <p className="text-slate-500 mt-1">
+            {isCustomer ? 'Pantau status pemesanan, tiket, dan tagihan Anda.' : 'Kelola data pemesanan dan pembayaran lapangan.'}
+          </p>
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
           <div className="relative w-full sm:w-80 group">
@@ -131,10 +136,28 @@ export default function BookingClient({ initialData, lapangan }) {
                       </div>
                     </td>
                     <td className="p-6">
-                      {row.id_bayar
-                        ? <span className="inline-flex items-center px-4 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-xs font-bold border border-emerald-100"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-2"></span>Lunas</span>
-                        : <span className="inline-flex items-center px-4 py-1.5 bg-amber-50 text-amber-700 rounded-full text-xs font-bold border border-amber-100"><span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-2"></span>Belum Lunas</span>
-                      }
+                      {row.id_bayar ? (
+                        row.jenis_bayar === 'DP' ? (
+                          <div className="flex flex-col gap-1">
+                            <span className="inline-flex items-center px-3 py-1 bg-sky-50 text-sky-700 rounded-full text-xs font-bold border border-sky-100">
+                              <span className="w-1.5 h-1.5 rounded-full bg-sky-500 mr-2"></span>DP (Terkonfirmasi)
+                            </span>
+                            {row.sisa_bayar > 0 && (
+                              <span className="text-[11px] font-semibold text-slate-500">
+                                Sisa: Rp {Number(row.sisa_bayar).toLocaleString('id-ID')}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="inline-flex items-center px-4 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-xs font-bold border border-emerald-100">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-2"></span>Lunas
+                          </span>
+                        )
+                      ) : (
+                        <span className="inline-flex items-center px-4 py-1.5 bg-amber-50 text-amber-700 rounded-full text-xs font-bold border border-amber-100">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-2"></span>Belum Bayar
+                        </span>
+                      )}
                     </td>
                     <td className="p-6">
                       <div className="flex items-center gap-2 text-slate-500">
@@ -153,7 +176,14 @@ export default function BookingClient({ initialData, lapangan }) {
                           <Ticket size={18} />
                         </Link>
                         <button onClick={() => openModal('edit', row)} disabled={!!row.id_bayar} className="p-2.5 text-amber-500 bg-amber-50 hover:bg-amber-500 hover:text-white rounded-xl transition-all shadow-sm hover:shadow-md disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-amber-50 disabled:hover:text-amber-500" title="Edit Data"><Edit size={18} /></button>
-                        <button onClick={() => openModal('delete', row)} disabled={!!row.id_bayar} className="p-2.5 text-red-500 bg-red-50 hover:bg-red-500 hover:text-white rounded-xl transition-all shadow-sm hover:shadow-md disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-red-50 disabled:hover:text-red-500" title="Hapus"><Trash2 size={18} /></button>
+                        <button 
+                          onClick={() => openModal('delete', row)} 
+                          disabled={!!row.id_bayar} 
+                          className="p-2.5 text-red-500 bg-red-50 hover:bg-red-500 hover:text-white rounded-xl transition-all shadow-sm hover:shadow-md disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-red-50 disabled:hover:text-red-500" 
+                          title={isCustomer ? "Batalkan Pesanan" : "Hapus Booking"}
+                        >
+                          <Trash2 size={18} />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -192,10 +222,10 @@ export default function BookingClient({ initialData, lapangan }) {
                 {modalType === 'delete' ? (
                   <div className="text-center py-4">
                     <div className="w-24 h-24 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border border-red-100"><Trash2 size={40} /></div>
-                    <p className="text-2xl font-bold text-slate-800 mb-3">Hapus Booking?</p>
+                    <p className="text-2xl font-bold text-slate-800 mb-3">{isCustomer ? 'Batalkan Pesanan?' : 'Hapus Booking?'}</p>
                     <p className="text-slate-500 text-lg leading-relaxed">
-                      Hapus booking <b>{selectedData?.id_booking}</b> atas nama <b>{selectedData?.pelanggan}</b>?<br/>
-                      <span className="text-red-500 font-medium">Semua jadwal item di dalamnya juga akan terhapus.</span>
+                      {isCustomer ? 'Apakah Anda yakin ingin membatalkan pesanan' : 'Hapus booking'} <b>{selectedData?.id_booking}</b>?<br/>
+                      <span className="text-red-500 font-medium">Slot jadwal akan otomatis dilepaskan kembali.</span>
                     </p>
                   </div>
                 ) : (
@@ -218,7 +248,15 @@ export default function BookingClient({ initialData, lapangan }) {
                     </div>
                     <div className="space-y-3">
                       <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">Nama Pelanggan (Pemesan)</label>
-                      <input type="text" name="pelanggan" defaultValue={selectedData?.pelanggan} required className={inputClass} placeholder="Contoh: Tim Futsal Jaya" />
+                      <input 
+                        type="text" 
+                        name="pelanggan" 
+                        defaultValue={modalType === 'add' && isCustomer ? (currentUser?.username || '') : selectedData?.pelanggan} 
+                        readOnly={isCustomer}
+                        required 
+                        className={`${inputClass} ${isCustomer ? 'bg-slate-100/70 border-slate-200 text-slate-600 font-semibold cursor-not-allowed shadow-inner' : ''}`} 
+                        placeholder="Contoh: Tim Futsal Jaya" 
+                      />
                     </div>
                     {modalType === 'add' && (
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-slate-100 mt-4">

@@ -1,7 +1,7 @@
 import db from '@/lib/db'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowRight, Trophy, Clock, ShieldCheck, Users, Ticket, Wallet, Activity, MapPin } from 'lucide-react'
+import { ArrowRight, Trophy, Clock, ShieldCheck, Users, Ticket, Wallet, Activity, MapPin, Sun, Moon } from 'lucide-react'
 import { getSession } from '@/lib/session'
 
 async function getDashboardData() {
@@ -163,28 +163,29 @@ export default async function DashboardPage() {
                       </p>
                       
                       <div className="mt-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 border-t border-slate-100 pt-6">
-                        <div className="flex flex-col gap-1">
-                          <div className="flex items-end gap-2">
-                            <div className="text-2xl font-black text-emerald-600">
-                              Rp {Number(lap.harga).toLocaleString('id-ID')}
+                        <div className="flex flex-col gap-2">
+                          <div className="flex flex-wrap items-center gap-3">
+                            <div className="flex items-center gap-2 bg-amber-50 border border-amber-200/80 px-3 py-1.5 rounded-xl">
+                              <Sun size={16} className="text-amber-500" />
+                              <div className="leading-tight">
+                                <span className="text-[10px] uppercase font-bold text-amber-700 block">Siang</span>
+                                <span className="text-base font-black text-slate-800">Rp {Number(lap.harga).toLocaleString('id-ID')}</span>
+                              </div>
                             </div>
-                            <span className="text-slate-400 text-sm font-medium mb-1">/jam (Reguler)</span>
+                            {lap.harga_malam && (
+                              <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-200/80 px-3 py-1.5 rounded-xl">
+                                <Moon size={16} className="text-indigo-500" />
+                                <div className="leading-tight">
+                                  <span className="text-[10px] uppercase font-bold text-indigo-700 block">Malam (20:00+)</span>
+                                  <span className="text-base font-black text-indigo-700">Rp {Number(lap.harga_malam).toLocaleString('id-ID')}</span>
+                                </div>
+                              </div>
+                            )}
                           </div>
-                          
-                          {(lap.harga_malam || lap.harga_weekend) && (
-                            <div className="flex flex-col gap-1 mt-2">
-                              {lap.harga_malam && (
-                                <div className="text-xs font-semibold text-slate-500 flex items-center justify-between bg-slate-50 px-3 py-1.5 rounded-md border border-slate-100">
-                                  <span>Malam (18:00+)</span>
-                                  <span className="text-amber-600 font-bold">Rp {Number(lap.harga_malam).toLocaleString('id-ID')}</span>
-                                </div>
-                              )}
-                              {lap.harga_weekend && (
-                                <div className="text-xs font-semibold text-slate-500 flex items-center justify-between bg-slate-50 px-3 py-1.5 rounded-md border border-slate-100">
-                                  <span>Weekend (Sab-Min)</span>
-                                  <span className="text-indigo-600 font-bold">Rp {Number(lap.harga_weekend).toLocaleString('id-ID')}</span>
-                                </div>
-                              )}
+                          {lap.harga_weekend && (
+                            <div className="text-xs font-semibold text-slate-500 flex items-center justify-between bg-slate-50 px-3 py-1.5 rounded-md border border-slate-100">
+                              <span>Weekend (Sab-Min)</span>
+                              <span className="text-indigo-600 font-bold">Rp {Number(lap.harga_weekend).toLocaleString('id-ID')}</span>
                             </div>
                           )}
                         </div>
@@ -337,16 +338,42 @@ export default async function DashboardPage() {
                     </span>
                   </div>
 
-                  <div className="absolute bottom-5 left-5 z-20">
-                    <span className="px-4 py-2 bg-emerald-500 text-white font-bold text-lg rounded-2xl shadow-lg">
-                      Rp {Number(lap.harga).toLocaleString('id-ID')} <span className="text-emerald-100 text-sm font-medium">/jam</span>
-                    </span>
+                  <div className="absolute bottom-4 left-4 right-4 z-20 flex items-center gap-2">
+                    <div className="flex-1 bg-slate-900/85 backdrop-blur-md border border-white/10 rounded-2xl p-2.5 shadow-xl flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+                          <Sun size={15} />
+                        </div>
+                        <div className="leading-tight">
+                          <span className="text-[10px] uppercase font-bold text-slate-300 block">Siang</span>
+                          <span className="text-xs font-black text-white">Rp {Number(lap.harga).toLocaleString('id-ID')}</span>
+                        </div>
+                      </div>
+                      {lap.harga_malam && (
+                        <div className="flex items-center gap-2 pl-3 border-l border-white/10">
+                          <div className="w-7 h-7 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0">
+                            <Moon size={15} />
+                          </div>
+                          <div className="leading-tight">
+                            <span className="text-[10px] uppercase font-bold text-indigo-200 block">Malam (20:00+)</span>
+                            <span className="text-xs font-black text-indigo-300">Rp {Number(lap.harga_malam).toLocaleString('id-ID')}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div className="p-8 flex-1 flex flex-col">
-                  <h3 className="text-2xl font-bold text-slate-800 mb-2">{lap.nama_lapangan}</h3>
-                  <p className="text-slate-500 text-sm mb-8 flex-1 leading-relaxed">
-                    Fasilitas lapangan futsal premium dengan standar kualitas rumput terbaik, pencahayaan terang, dan area istirahat yang nyaman.
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <h3 className="text-2xl font-bold text-slate-800">{lap.nama_lapangan}</h3>
+                    {lap.jenis_lantai && (
+                      <span className="text-[11px] font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
+                        {lap.jenis_lantai}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-slate-500 text-sm mb-6 flex-1 leading-relaxed">
+                    {lap.fasilitas ? `Fasilitas: ${lap.fasilitas}` : `Fasilitas lapangan futsal premium dengan standar kualitas rumput terbaik, pencahayaan terang, dan area istirahat yang nyaman.`}
                   </p>
                   <Link
                     href="/booking"

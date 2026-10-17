@@ -1,12 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Plus, Edit, Trash2, X, ArrowLeft, CreditCard, CheckCircle, Ticket, Map, Clock, CalendarDays, Wallet, User } from 'lucide-react'
 import Link from 'next/link'
 import Swal from 'sweetalert2'
 import { addBookingItem, editBookingItem, deleteBookingItem, bayarBooking, getMidtransToken } from './actions'
 
-const JAM_OPTIONS = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00','22:00','23:00','00:00','01:00','02:00','03:00']
+const JAM_OPTIONS = ['08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','20:00','21:00','22:00','23:00','00:00','01:00','02:00','03:00']
 
 export default function BookingItemClient({ bookingInfo, items, total, kode_booking, pelanggan, kode_lapangan, userLevel }) {
   const [modalType, setModalType] = useState(null)
@@ -14,9 +14,31 @@ export default function BookingItemClient({ bookingInfo, items, total, kode_book
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
   const isPaid = !!bookingInfo?.id_bayar
+  const isDP = bookingInfo?.jenis_bayar === 'DP'
+  const isLunas = isPaid && !isDP
+
+  // Option for payment: 'DP' (50%) or 'FULL'
+  const [opsiBayar, setOpsiBayar] = useState('DP')
 
   const closeModal = () => { setModalType(null); setSelectedData(null); setError(null) }
   const openModal = (type, data = null) => { setModalType(type); setSelectedData(data) }
+
+  // Calculate amount to pay
+  const nominalBayar = useMemo(() => {
+    if (isDP) {
+      return Number(bookingInfo?.sisa_bayar || (total - Number(bookingInfo?.total_bayar || 0)))
+    }
+    if (opsiBayar === 'DP') {
+      return Math.round(total * 0.5)
+    }
+    return total
+  }, [isDP, bookingInfo, total, opsiBayar])
+
+  const sisaAkanDatang = useMemo(() => {
+    if (isDP) return 0
+    if (opsiBayar === 'DP') return total - nominalBayar
+    return 0
+  }, [isDP, total, nominalBayar, opsiBayar])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -30,44 +52,107 @@ export default function BookingItemClient({ bookingInfo, items, total, kode_book
     else if (modalType === 'delete') result = await deleteBookingItem(null, formData)
     else if (modalType === 'bayar') result = await bayarBooking(null, formData)
     else if (modalType === 'bayar_transfer') {
-      // Get snap token
-      const tokenRes = await getMidtransToken(kode_booking, total, pelanggan)
+      // Get snap token or check if running in simulation mode
+      const tokenRes = await getMidtransToken(kode_booking, nominalBayar, pelanggan)
+      
       if (tokenRes.error) {
         setError(tokenRes.error)
         setIsLoading(false)
         return
       }
-      
-      // Pay with snap
-      window.snap.pay(tokenRes.token, {
-        onSuccess: async function(snapResult){
-          // Auto submit the payment to DB upon success
-          const payRes = await bayarBooking(null, formData)
-          if (payRes.error) setError(payRes.error)
-          else {
-            closeModal()
-            Swal.fire({
-              title: 'Pembayaran Sukses!',
-              text: 'Pembayaran Midtrans berhasil, booking dilunasi.',
-              icon: 'success',
-              confirmButtonColor: '#10b981',
-              customClass: { popup: 'rounded-[2rem]' }
-            })
-          }
+
+      // Jika mode simulasi (kunci Midtrans belum diisi / offline testing)
+      if (tokenRes.isSimulated) {
+        const confirmSim = await Swal.fire({
+          title: 'Simulasi Pembayaran',
+          html: `
+            <div class="text-left text-sm space-y-3 p-3 bg-slate-50 rounded-2xl border border-slate-200">
+              <p class="text-slate-600 font-medium">Mode simulasi otomatis aktif karena API Key Midtrans belum dikonfigurasi.</p>
+              <div class="p-3 bg-white rounded-xl border border-emerald-200">
+                <span class="text-xs text-slate-400 font-bold uppercase block">Jumlah yang Dibayar</span>
+                <span class="text-xl font-black text-emerald-600">Rp ${nominalBayar.toLocaleString('id-ID')}</span>
+                <span class="text-xs text-slate-500 block mt-1">Jenis: <b>${isDP ? 'Pelunasan' : (opsiBayar === 'DP' ? 'Uang Muka (DP 50%)' : 'Lunas')}</b></span>
+              </div>
+              <p class="text-xs text-slate-500">Klik <b>"Simulasikan Bayar Berhasil"</b> untuk mengonfirmasi transaksi dan memperbarui status pemesanan.</p>
+            </div>
+          `,
+          icon: 'info',
+          showCancelButton: true,
+          confirmButtonColor: '#0ea5e9',
+          cancelButtonColor: '#94a3b8',
+          confirmButtonText: '✓ Simulasikan Bayar Berhasil',
+          cancelButtonText: 'Batal',
+          customClass: { popup: 'rounded-[2rem]' }
+        })
+
+        if (!confirmSim.isConfirmed) {
           setIsLoading(false)
-        },
-        onPending: function(result){
-          setError('Pembayaran masih pending atau belum selesai.')
-          setIsLoading(false)
-        },
-        onError: function(result){
-          setError('Pembayaran gagal.')
-          setIsLoading(false)
-        },
-        onClose: function(){
-          setIsLoading(false)
+          return
         }
-      })
+
+        const payRes = await bayarBooking(null, formData)
+        if (payRes.error) {
+          setError(payRes.error)
+        } else {
+          closeModal()
+          Swal.fire({
+            title: 'Pembayaran Dikonfirmasi!',
+            text: `Pembayaran ${isDP ? 'Pelunasan' : (opsiBayar === 'DP' ? 'DP (50%)' : 'Lunas')} berhasil diproses.`,
+            icon: 'success',
+            confirmButtonColor: '#10b981',
+            customClass: { popup: 'rounded-[2rem]' }
+          })
+        }
+        setIsLoading(false)
+        return
+      }
+      
+      // Pay with real snap if token exists and snap is loaded
+      if (typeof window !== 'undefined' && window.snap && tokenRes.token) {
+        window.snap.pay(tokenRes.token, {
+          onSuccess: async function(snapResult){
+            const payRes = await bayarBooking(null, formData)
+            if (payRes.error) setError(payRes.error)
+            else {
+              closeModal()
+              Swal.fire({
+                title: 'Pembayaran Sukses!',
+                text: `Pembayaran ${isDP ? 'Pelunasan' : (opsiBayar === 'DP' ? 'DP (50%)' : 'Lunas')} berhasil.`,
+                icon: 'success',
+                confirmButtonColor: '#10b981',
+                customClass: { popup: 'rounded-[2rem]' }
+              })
+            }
+            setIsLoading(false)
+          },
+          onPending: function(result){
+            setError('Pembayaran masih pending atau belum selesai.')
+            setIsLoading(false)
+          },
+          onError: function(result){
+            setError('Pembayaran gagal.')
+            setIsLoading(false)
+          },
+          onClose: function(){
+            setIsLoading(false)
+          }
+        })
+      } else {
+        // Fallback jika window.snap tidak termuat
+        const payRes = await bayarBooking(null, formData)
+        if (payRes.error) setError(payRes.error)
+        else {
+          closeModal()
+          Swal.fire({
+            title: 'Pembayaran Sukses!',
+            text: `Pembayaran ${isDP ? 'Pelunasan' : (opsiBayar === 'DP' ? 'DP (50%)' : 'Lunas')} berhasil.`,
+            icon: 'success',
+            confirmButtonColor: '#10b981',
+            customClass: { popup: 'rounded-[2rem]' }
+          })
+        }
+        setIsLoading(false)
+      }
       
       return // Wait for snap callback
     }
@@ -107,21 +192,32 @@ export default function BookingItemClient({ bookingInfo, items, total, kode_book
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {isPaid
-              ? (
-                  <>
-                    <Link target="_blank" href={`/invoice/${kode_booking}`} className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl shadow-sm transition-all font-bold">
-                      <Ticket size={20} /> Unduh Tiket
-                    </Link>
-                    <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl shadow-sm"><CheckCircle size={20} className="text-emerald-500" /> <span className="font-bold">Lunas</span></div>
-                  </>
-                )
-              : <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-50 border border-amber-100 text-amber-700 rounded-2xl shadow-sm"><Clock size={20} className="text-amber-500" /> <span className="font-bold">Menunggu Pembayaran</span></div>
-            }
+            {isLunas && (
+              <>
+                <Link target="_blank" href={`/invoice/${kode_booking}`} className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl shadow-sm transition-all font-bold">
+                  <Ticket size={20} /> Unduh Tiket
+                </Link>
+                <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-2xl shadow-sm"><CheckCircle size={20} className="text-emerald-500" /> <span className="font-bold">Lunas</span></div>
+              </>
+            )}
+            {isDP && (
+              <>
+                <Link target="_blank" href={`/invoice/${kode_booking}`} className="inline-flex items-center gap-2 px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl shadow-sm transition-all font-bold">
+                  <Ticket size={20} /> Unduh Bukti DP
+                </Link>
+                <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-sky-50 border border-sky-100 text-sky-700 rounded-2xl shadow-sm">
+                  <CheckCircle size={20} className="text-sky-500" /> 
+                  <span className="font-bold">DP Terkonfirmasi</span>
+                </div>
+              </>
+            )}
+            {!isPaid && (
+              <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-50 border border-amber-100 text-amber-700 rounded-2xl shadow-sm"><Clock size={20} className="text-amber-500" /> <span className="font-bold">Menunggu Pembayaran DP</span></div>
+            )}
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 bg-slate-50/50 rounded-2xl border border-slate-100">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 p-6 bg-slate-50/50 rounded-2xl border border-slate-100">
           <div>
             <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-2 flex items-center gap-2"><User size={14} /> Pelanggan</p>
             <p className="font-bold text-slate-800 text-lg">{bookingInfo?.pelanggan}</p>
@@ -130,9 +226,21 @@ export default function BookingItemClient({ bookingInfo, items, total, kode_book
             <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-2 flex items-center gap-2"><Map size={14} /> Lapangan</p>
             <p className="font-bold text-slate-800 text-lg">{bookingInfo?.nama_lapangan}</p>
           </div>
+          <div>
+            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-2 flex items-center gap-2"><Wallet size={14} /> Total Biaya Sewa</p>
+            <p className="font-extrabold text-slate-800 text-xl">Rp {total.toLocaleString('id-ID')}</p>
+          </div>
           <div className="md:text-right">
-            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-2 flex items-center gap-2 md:justify-end"><Wallet size={14} /> Total Tagihan</p>
-            <p className="font-extrabold text-emerald-600 text-2xl">Rp {total.toLocaleString('id-ID')}</p>
+            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-2 flex items-center gap-2 md:justify-end">
+              {isDP ? 'Sisa Yang Harus Dilunasi' : 'Minimal DP 50%'}
+            </p>
+            <p className={`font-extrabold text-2xl ${isLunas ? 'text-emerald-600' : isDP ? 'text-amber-600' : 'text-sky-600'}`}>
+              {isLunas 
+                ? 'Lunas' 
+                : isDP 
+                ? `Rp ${Number(bookingInfo?.sisa_bayar || (total - Number(bookingInfo?.total_bayar || 0))).toLocaleString('id-ID')}`
+                : `Rp ${(total * 0.5).toLocaleString('id-ID')}`}
+            </p>
           </div>
         </div>
       </div>
@@ -144,19 +252,21 @@ export default function BookingItemClient({ bookingInfo, items, total, kode_book
             <CalendarDays className="text-emerald-500" size={24} /> 
             Daftar Jadwal Sesi Main
           </h2>
-          {!isPaid && (
+          {!isLunas && (
             <div className="flex gap-3 w-full sm:w-auto">
-              <button onClick={() => openModal('add')} className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 px-5 py-3 rounded-2xl text-sm font-bold transition-all shadow-sm hover:shadow-md">
-                <Plus size={18} /> Tambah Sesi
-              </button>
+              {!isPaid && (
+                <button onClick={() => openModal('add')} className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 px-5 py-3 rounded-2xl text-sm font-bold transition-all shadow-sm hover:shadow-md">
+                  <Plus size={18} /> Tambah Sesi
+                </button>
+              )}
               {items.length > 0 && (
                 <>
                   <button onClick={() => openModal('bayar_transfer')} className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-600 hover:to-indigo-600 text-white px-5 py-3 rounded-2xl text-sm font-bold transition-all shadow-[0_4px_12px_rgba(14,165,233,0.3)] hover:shadow-[0_8px_20px_rgba(14,165,233,0.4)] hover:-translate-y-0.5">
-                    <CreditCard size={18} /> Via Transfer / Online
+                    <CreditCard size={18} /> {isDP ? 'Pelunasan Online' : 'Bayar DP / Lunas Online'}
                   </button>
                   {userLevel === '1' && (
                     <button onClick={() => openModal('bayar')} className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-3 rounded-2xl text-sm font-bold transition-all shadow-md shadow-emerald-500/20 hover:-translate-y-0.5">
-                      <Wallet size={18} /> Bayar Cash
+                      <Wallet size={18} /> {isDP ? 'Pelunasan Kasir' : 'Bayar Kasir'}
                     </button>
                   )}
                 </>
@@ -234,7 +344,7 @@ export default function BookingItemClient({ bookingInfo, items, total, kode_book
                 {modalType === 'edit' && 'Edit Sesi Main'}
                 {modalType === 'delete' && 'Hapus Sesi Main'}
                 {modalType === 'bayar' && 'Konfirmasi Pembayaran Cash'}
-                {modalType === 'bayar_transfer' && 'Bayar Online via Midtrans'}
+                {modalType === 'bayar_transfer' && 'Bayar Online / Transfer Instan'}
               </h3>
               <button onClick={closeModal} className="text-slate-400 hover:text-slate-700 transition-colors p-2 bg-white hover:bg-slate-100 rounded-full shadow-sm border border-slate-200">
                 <X size={20} />
@@ -255,14 +365,57 @@ export default function BookingItemClient({ bookingInfo, items, total, kode_book
 
                 {(modalType === 'bayar' || modalType === 'bayar_transfer') && (
                   <>
-                    <input type="hidden" name="total" value={total} />
-                    <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200 mb-6 text-center shadow-inner">
-                      <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-2">Total Tagihan Yang Harus Dibayar</p>
-                      <p className="text-4xl font-extrabold text-emerald-600">Rp {total.toLocaleString('id-ID')}</p>
+                    <input type="hidden" name="total" value={nominalBayar} />
+                    <input type="hidden" name="jenis_bayar" value={isDP ? 'LUNAS' : (opsiBayar === 'DP' ? 'DP' : 'LUNAS')} />
+                    <input type="hidden" name="sisa_bayar" value={sisaAkanDatang} />
+
+                    {/* Radio pilihan DP vs LUNAS jika belum bayar DP */}
+                    {!isDP && (
+                      <div className="space-y-2 mb-4">
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Pilih Opsi Pembayaran</label>
+                        <div className="grid grid-cols-2 gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setOpsiBayar('DP')}
+                            className={`p-4 rounded-2xl border-2 text-left transition-all ${opsiBayar === 'DP' ? 'border-sky-500 bg-sky-50/60 shadow-md shadow-sky-500/10' : 'border-slate-200 hover:border-slate-300'}`}
+                          >
+                            <span className="block text-xs font-bold uppercase text-sky-600 mb-1">Uang Muka (DP 50%)</span>
+                            <span className="block text-lg font-black text-slate-800">Rp {(total * 0.5).toLocaleString('id-ID')}</span>
+                            <span className="block text-[11px] text-slate-500 mt-0.5">Sisa dilunasi saat main</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setOpsiBayar('FULL')}
+                            className={`p-4 rounded-2xl border-2 text-left transition-all ${opsiBayar === 'FULL' ? 'border-emerald-500 bg-emerald-50/60 shadow-md shadow-emerald-500/10' : 'border-slate-200 hover:border-slate-300'}`}
+                          >
+                            <span className="block text-xs font-bold uppercase text-emerald-600 mb-1">Bayar Lunas (100%)</span>
+                            <span className="block text-lg font-black text-slate-800">Rp {total.toLocaleString('id-ID')}</span>
+                            <span className="block text-[11px] text-slate-500 mt-0.5">Langsung lunas</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200 mb-4 text-center shadow-inner">
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">
+                        {isDP ? 'Nominal Pelunasan' : (opsiBayar === 'DP' ? 'Nominal DP (50%) yang Dibayar' : 'Total Bayar Lunas')}
+                      </p>
+                      <p className="text-4xl font-extrabold text-emerald-600">Rp {nominalBayar.toLocaleString('id-ID')}</p>
+                      {opsiBayar === 'DP' && !isDP && (
+                        <p className="text-xs font-semibold text-sky-700 mt-2">
+                          Sisa tagihan Rp {sisaAkanDatang.toLocaleString('id-ID')} dilunasi saat bermain di lokasi.
+                        </p>
+                      )}
                     </div>
-                    <p className="text-slate-600 text-lg leading-relaxed text-center">
-                      Anda akan mengkonfirmasi pembayaran {modalType === 'bayar' ? <b>tunai</b> : <b>online (transfer)</b>} untuk booking <b>{kode_booking}</b> atas nama <b>{pelanggan}</b>.
+                    <p className="text-slate-600 text-sm leading-relaxed text-center">
+                      Anda akan memproses pembayaran {modalType === 'bayar' ? <b>tunai di kasir</b> : <b>online (Transfer Bank / Sandbox)</b>} untuk booking <b>{kode_booking}</b> atas nama <b>{pelanggan}</b>.
                     </p>
+                    {modalType === 'bayar_transfer' && (
+                      <div className="p-3 bg-sky-50 border border-sky-100 rounded-xl text-sky-700 text-xs flex items-center justify-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-sky-500 animate-ping" />
+                        <span>Mode Sandbox / Simulasi Instan aktif otomatis untuk testing.</span>
+                      </div>
+                    )}
                   </>
                 )}
                 

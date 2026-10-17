@@ -21,7 +21,7 @@ export default async function AdminLayout({ children }) {
         <div className="flex-1 overflow-y-auto py-6 px-4 space-y-1.5 custom-scrollbar">
           <ActiveLink href="/dashboard" icon={<LayoutDashboard size={20} />} label="Dashboard" />
           <ActiveLink href="/jadwal" icon={<Calendar size={20} />} label="Jadwal Lapangan" />
-          <ActiveLink href="/booking" icon={<Ticket size={20} />} label="Data Booking" />
+          <ActiveLink href="/booking" icon={<Ticket size={20} />} label={user?.level === '1' ? 'Data Booking' : 'Pesanan Saya'} />
           
           {user?.level === '1' && (
             <>

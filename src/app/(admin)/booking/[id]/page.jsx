@@ -19,7 +19,8 @@ export default async function BookingItemPage({ params, searchParams }) {
 
   try {
     const [bookingRows] = await db.query(`
-      SELECT tb_booking.*, tb_daftar_lapangan.nama_lapangan, tb_bayar.id_bayar
+      SELECT tb_booking.*, tb_daftar_lapangan.nama_lapangan, 
+             tb_bayar.id_bayar, tb_bayar.jenis_bayar, tb_bayar.sisa_bayar, tb_bayar.total_bayar, tb_bayar.waktu_bayar
       FROM tb_booking
       LEFT JOIN tb_daftar_lapangan ON tb_booking.kode_lapangan = tb_daftar_lapangan.id_lapangan
       LEFT JOIN tb_bayar ON tb_bayar.id_bayar = tb_booking.id_booking

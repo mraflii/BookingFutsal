@@ -10,7 +10,8 @@ export default async function InvoicePage({ params }) {
   const { id } = await params
   
   const [bookingRows] = await db.query(`
-    SELECT tb_booking.*, tb_daftar_lapangan.nama_lapangan, tb_bayar.id_bayar, tb_bayar.waktu_bayar, tb_bayar.total_bayar
+    SELECT tb_booking.*, tb_daftar_lapangan.nama_lapangan, 
+           tb_bayar.id_bayar, tb_bayar.waktu_bayar, tb_bayar.total_bayar, tb_bayar.jenis_bayar, tb_bayar.sisa_bayar
     FROM tb_booking
     LEFT JOIN tb_daftar_lapangan ON tb_booking.kode_lapangan = tb_daftar_lapangan.id_lapangan
     LEFT JOIN tb_bayar ON tb_bayar.id_bayar = tb_booking.id_booking
@@ -72,7 +73,13 @@ export default async function InvoicePage({ params }) {
           <div>
             <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Ditagihkan Kepada:</div>
             <div className="text-lg font-bold text-slate-800">{booking.pelanggan}</div>
-            <div className="text-sm text-slate-500 mt-1">Status: <span className="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">LUNAS</span></div>
+            <div className="text-sm text-slate-500 mt-1">
+              Status: {booking.jenis_bayar === 'DP' ? (
+                <span className="font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-200">DP TERKONFIRMASI (50%)</span>
+              ) : (
+                <span className="font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">LUNAS</span>
+              )}
+            </div>
           </div>
           <div className="md:text-right">
             <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Tanggal Transaksi:</div>
@@ -120,16 +127,26 @@ export default async function InvoicePage({ params }) {
           <div className="flex justify-end">
             <div className="w-full max-w-xs bg-slate-50 rounded-2xl p-5 border border-slate-100">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-slate-500">Subtotal</span>
-                <span className="text-sm font-bold text-slate-800">Rp {Number(booking.total_bayar).toLocaleString('id-ID')}</span>
+                <span className="text-sm font-medium text-slate-500">Total Biaya Sewa</span>
+                <span className="text-sm font-bold text-slate-800">
+                  Rp {(items.reduce((s, it) => s + (Number(it.subtotal) || 0), 0)).toLocaleString('id-ID')}
+                </span>
               </div>
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-sm font-medium text-slate-500">Pajak (0%)</span>
-                <span className="text-sm font-bold text-slate-800">Rp 0</span>
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium text-slate-500">Telah Dibayar ({booking.jenis_bayar === 'DP' ? 'DP' : 'Lunas'})</span>
+                <span className="text-sm font-bold text-emerald-600">Rp {Number(booking.total_bayar).toLocaleString('id-ID')}</span>
               </div>
+              {booking.jenis_bayar === 'DP' && Number(booking.sisa_bayar) > 0 && (
+                <div className="flex justify-between items-center mb-2 text-amber-700 bg-amber-50/80 px-2.5 py-1.5 rounded-lg border border-amber-200/50">
+                  <span className="text-xs font-bold">Sisa Pelunasan di Lokasi</span>
+                  <span className="text-sm font-black">Rp {Number(booking.sisa_bayar).toLocaleString('id-ID')}</span>
+                </div>
+              )}
               <div className="flex justify-between items-center pt-3 border-t border-slate-200">
-                <span className="font-bold text-slate-800">Total Bayar</span>
-                <span className="text-xl font-black text-emerald-600">Rp {Number(booking.total_bayar).toLocaleString('id-ID')}</span>
+                <span className="font-bold text-slate-800">Status Transaksi</span>
+                <span className={`text-base font-black ${booking.jenis_bayar === 'DP' ? 'text-sky-600' : 'text-emerald-600'}`}>
+                  {booking.jenis_bayar === 'DP' ? 'DP 50% (Terkonfirmasi)' : 'Lunas (100%)'}
+                </span>
               </div>
             </div>
           </div>
