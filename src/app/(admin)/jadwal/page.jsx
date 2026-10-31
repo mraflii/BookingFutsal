@@ -1,12 +1,16 @@
 import db from '@/lib/db'
 import { getSession } from '@/lib/session'
 import JadwalClient from './JadwalClient'
+import { cleanupExpiredBookings } from '@/lib/bookingAutoCancel'
 
 export const metadata = { title: 'Cek Ketersediaan Jadwal - Alouh Futsal' }
 
 export default async function JadwalPage() {
   const session = await getSession()
   const user = session?.user
+
+  // Batalkan otomatis booking yang belum bayar > 1 jam agar slot jadwal terbuka kembali
+  await cleanupExpiredBookings()
 
   let jadwal = []
   let lapangan = []

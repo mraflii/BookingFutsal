@@ -78,7 +78,7 @@ export default function JadwalClient({ initialJadwal, lapanganList, currentUser 
       const bookingTime = new Date(slot.waktu_booking).getTime()
       const now = new Date().getTime()
       const diffMins = Math.floor((now - bookingTime) / 60000)
-      if (diffMins > 15) {
+      if (diffMins > 60) {
         return 'KEDALUWARSA'
       }
       return 'DIPROSES'
@@ -143,7 +143,14 @@ export default function JadwalClient({ initialJadwal, lapanganList, currentUser 
       
       Swal.fire({
         title: 'Booking Dibuat!',
-        html: `Slot jam <b>${modalSlot}</b> berhasil dipesan.<br/><span class="text-emerald-600 font-medium">Lanjutkan pembayaran DP (50%) atau Lunas untuk mengonfirmasi jadwal.</span>`,
+        html: `
+          <div class="text-left text-sm space-y-2 mt-2">
+            <p>Slot jam <b>${modalSlot}</b> berhasil dipesan atas nama <b>${currentUser?.username || 'Pelanggan'}</b>.</p>
+            <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-amber-800 text-xs">
+              ⚠️ <b>Penting:</b> Segera bayar DP minimal 50% atau Lunas dalam waktu <b>1 jam (60 menit)</b>. Jika belum dibayar dalam 1 jam, pesanan akan <b>dibatalkan otomatis</b> oleh sistem.
+            </div>
+          </div>
+        `,
         icon: 'success',
         confirmButtonText: 'Lanjut ke Pembayaran DP',
         confirmButtonColor: '#10b981',
@@ -217,7 +224,7 @@ export default function JadwalClient({ initialJadwal, lapanganList, currentUser 
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded-md border-2 border-red-500/50 bg-red-50/50" />
-            <span className="text-sm font-semibold text-slate-600">Kedaluwarsa (15 Menit)</span>
+            <span className="text-sm font-semibold text-slate-600">Kedaluwarsa (1 Jam)</span>
           </div>
         </div>
 

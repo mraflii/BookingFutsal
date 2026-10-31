@@ -1,6 +1,7 @@
 import db from '@/lib/db'
 import { getSession } from '@/lib/session'
 import BookingClient from './BookingClient'
+import { cleanupExpiredBookings } from '@/lib/bookingAutoCancel'
 
 export const metadata = { title: 'Data Booking - Alouh Futsal' }
 
@@ -8,6 +9,9 @@ export default async function BookingPage() {
   const session = await getSession()
   const user = session?.user
   const isCustomer = user?.level === '2'
+
+  // Bersihkan booking yang tidak dibayar lebih dari 1 jam
+  await cleanupExpiredBookings()
 
   let bookings = []
   let lapangan = []

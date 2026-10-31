@@ -212,10 +212,26 @@ export default function BookingItemClient({ bookingInfo, items, total, kode_book
               </>
             )}
             {!isPaid && (
-              <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-50 border border-amber-100 text-amber-700 rounded-2xl shadow-sm"><Clock size={20} className="text-amber-500" /> <span className="font-bold">Menunggu Pembayaran DP</span></div>
+              <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl shadow-sm">
+                <Clock size={20} className="text-amber-600 animate-pulse" /> 
+                <span className="font-bold">Menunggu Pembayaran DP (Batas 1 Jam)</span>
+              </div>
             )}
           </div>
         </div>
+
+        {!isPaid && (
+          <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 flex items-start sm:items-center gap-3 text-amber-900">
+            <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0 font-bold">
+              <Clock size={20} />
+            </div>
+            <div className="text-sm">
+              <span className="font-bold">Perhatian Batas Waktu Pembayaran: </span>
+              Pesanan ini memiliki batas waktu pembayaran DP/Lunas selama <b>1 jam (60 menit)</b> sejak booking dibuat. 
+              Jika lewat dari 1 jam belum dibayar, sistem akan <b>membatalkan booking secara otomatis</b> dan slot jadwal akan dibuka kembali untuk pelanggan lain.
+            </div>
+          </div>
+        )}
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 p-6 bg-slate-50/50 rounded-2xl border border-slate-100">
           <div>

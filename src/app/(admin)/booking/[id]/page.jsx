@@ -1,8 +1,8 @@
 import db from '@/lib/db'
 import BookingItemClient from './BookingItemClient'
 import { notFound } from 'next/navigation'
-
 import { getSession } from '@/lib/session'
+import { cleanupExpiredBookings } from '@/lib/bookingAutoCancel'
 
 export async function generateMetadata({ params }) {
   return { title: `Booking ${(await params).id} - Alouh Futsal` }
@@ -14,6 +14,9 @@ export default async function BookingItemPage({ params, searchParams }) {
   const session = await getSession()
   const userLevel = session?.user?.level || '2'
   
+  // Bersihkan data kedaluwarsa jika ada
+  await cleanupExpiredBookings()
+
   let items = []
   let bookingInfo = null
 

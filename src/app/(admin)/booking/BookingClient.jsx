@@ -154,9 +154,14 @@ export default function BookingClient({ initialData, lapangan, userLevel = '1', 
                           </span>
                         )
                       ) : (
-                        <span className="inline-flex items-center px-4 py-1.5 bg-amber-50 text-amber-700 rounded-full text-xs font-bold border border-amber-100">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-2"></span>Belum Bayar
-                        </span>
+                        <div className="flex flex-col gap-1">
+                          <span className="inline-flex items-center px-3.5 py-1.5 bg-amber-50 text-amber-800 rounded-full text-xs font-bold border border-amber-200">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-2 animate-pulse"></span>Belum Bayar DP
+                          </span>
+                          <span className="text-[11px] text-red-500 font-semibold flex items-center gap-1">
+                            Batas bayar: 1 Jam
+                          </span>
+                        </div>
                       )}
                     </td>
                     <td className="p-6">

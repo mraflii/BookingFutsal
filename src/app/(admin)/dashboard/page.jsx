@@ -35,182 +35,205 @@ export default async function DashboardPage() {
   // Tampilan untuk User Biasa (Level 2) - Tentang Website
   if (userLevel === '2') {
     return (
-      <div className="space-y-16 pb-16 animate-fade-in-up">
-        {/* Premium Hero Section */}
-        <div className="relative overflow-hidden rounded-[3rem] bg-slate-900 text-white shadow-2xl group">
-          <Image 
-            src="/login-bg.png" 
+      <div className="space-y-8 pb-10 animate-fade-in-up">
+        {/* Modern & Compact Hero Banner */}
+        <div className="relative overflow-hidden rounded-3xl bg-slate-900 text-white shadow-xl group border border-slate-800">
+          <Image
+            src="/login-bg.png"
             alt="Futsal Background"
             fill
-            className="object-cover opacity-30 mix-blend-luminosity group-hover:scale-105 group-hover:opacity-40 transition-all duration-[2s] ease-in-out"
+            priority
+            className="object-cover opacity-25 mix-blend-luminosity group-hover:scale-105 group-hover:opacity-35 transition-all duration-1000 ease-out"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/80 to-slate-900/20" />
-          
-          <div className="relative z-10 px-6 py-20 md:py-28 flex flex-col items-center text-center max-w-5xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-bold mb-8 backdrop-blur-md">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
-              </span>
-              Booking Futsal Modern
-            </div>
-            
-            <h1 className="text-5xl md:text-6xl lg:text-8xl font-extrabold tracking-tight mb-8 leading-[1.1]">
-              Tingkatkan <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-200">
-                Permainanmu.
-              </span>
-            </h1>
-            
-            <p className="text-slate-300 text-lg md:text-2xl mb-12 leading-relaxed max-w-3xl font-light">
-              Fasilitas lapangan futsal premium dengan standar kualitas terbaik, 
-              untuk Anda dan tim meraih kemenangan di setiap pertandingan.
-            </p>
-            
-            <div className="flex flex-col sm:flex-row justify-center gap-5">
-              <Link
-                href="/booking"
-                className="group/btn relative inline-flex items-center justify-center gap-3 bg-emerald-500 text-slate-950 px-10 py-5 rounded-2xl font-bold shadow-[0_0_40px_rgba(16,185,129,0.3)] hover:shadow-[0_0_60px_rgba(16,185,129,0.5)] hover:-translate-y-1 transition-all duration-300 overflow-hidden"
-              >
-                <span className="relative z-10 flex items-center gap-2 text-lg">
-                  Mulai Booking
-                  <ArrowRight size={22} className="group-hover/btn:translate-x-1 transition-transform" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-900/80 to-slate-900/40" />
+
+          <div className="relative z-10 px-6 py-8 md:px-10 md:py-10 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="max-w-xl text-center md:text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold mb-4 backdrop-blur-sm">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                <div className="absolute inset-0 -translate-x-full group-hover/btn:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent z-0" />
-              </Link>
+                Arena Futsal Modern & Nyaman
+              </div>
+
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight mb-3 leading-tight">
+                Tingkatkan <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-200">Permainanmu.</span>
+              </h1>
+
+              <p className="text-slate-300 text-sm md:text-base leading-relaxed mb-6 font-normal">
+                Fasilitas lapangan futsal berstandar terbaik dengan rumput sintetis & fiber berkualitas untuk Anda dan tim meraih kemenangan di setiap pertandingan.
+              </p>
+
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
+                <Link
+                  href="/booking"
+                  className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-6 py-3 rounded-xl font-bold text-sm shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 hover:-translate-y-0.5 transition-all duration-200"
+                >
+                  Mulai Booking Sekarang
+                  <ArrowRight size={16} />
+                </Link>
+                <Link
+                  href="/jadwal"
+                  className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white border border-white/15 px-5 py-3 rounded-xl font-semibold text-sm backdrop-blur-sm transition-all duration-200"
+                >
+                  Lihat Jadwal
+                </Link>
+              </div>
+            </div>
+
+            {/* Quick Info Badges in Hero */}
+            <div className="grid grid-cols-2 gap-3 w-full md:w-auto shrink-0">
+              <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-4 text-center md:text-left min-w-[130px]">
+                <Clock className="w-5 h-5 text-emerald-400 mb-2 mx-auto md:mx-0" />
+                <p className="text-xs text-slate-400 font-medium">Jam Operasional</p>
+                <p className="text-sm font-bold text-white">08:00 - 03:00</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur-md border border-white/10 rounded-2xl p-4 text-center md:text-left min-w-[130px]">
+                <ShieldCheck className="w-5 h-5 text-teal-400 mb-2 mx-auto md:mx-0" />
+                <p className="text-xs text-slate-400 font-medium">Standar Lapangan</p>
+                <p className="text-sm font-bold text-white"> Fiber & Rumput</p>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Premium Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-4">
-          <div className="bg-white/50 backdrop-blur-xl rounded-[2.5rem] p-10 text-center shadow-sm border border-slate-200/60 hover:shadow-2xl hover:shadow-teal-500/5 hover:-translate-y-2 transition-all duration-500 group">
-            <div className="w-20 h-20 rounded-[1.5rem] bg-gradient-to-br from-emerald-50 to-teal-100 text-emerald-600 flex items-center justify-center mx-auto mb-8 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-inner">
-              <Activity size={36} strokeWidth={2.5} />
+        {/* Feature Highlights - Compact & Clean */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex items-start gap-4 hover:border-slate-200 hover:shadow-md transition-all">
+            <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+              <Activity size={22} />
             </div>
-            <h3 className="text-2xl font-bold text-slate-800 mb-4">Pemesanan Mudah</h3>
-            <p className="text-slate-500 leading-relaxed text-lg">
-              Booking lapangan hanya dengan beberapa kali klik kapanpun dan dimanapun tanpa perlu datang ke lokasi.
-            </p>
+            <div>
+              <h3 className="text-base font-bold text-slate-800 mb-1">Pemesanan Instan</h3>
+              <p className="text-slate-500 text-xs leading-relaxed">
+                Pilih jadwal, booking slot lapangan, dan upload bukti bayar dalam hitungan menit.
+              </p>
+            </div>
           </div>
-          
-          <div className="bg-white/50 backdrop-blur-xl rounded-[2.5rem] p-10 text-center shadow-sm border border-slate-200/60 hover:shadow-2xl hover:shadow-emerald-500/5 hover:-translate-y-2 transition-all duration-500 group">
-            <div className="w-20 h-20 rounded-[1.5rem] bg-gradient-to-br from-teal-50 to-emerald-100 text-teal-600 flex items-center justify-center mx-auto mb-8 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-500 shadow-inner">
-              <Clock size={36} strokeWidth={2.5} />
+
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex items-start gap-4 hover:border-slate-200 hover:shadow-md transition-all">
+            <div className="w-12 h-12 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
+              <Clock size={22} />
             </div>
-            <h3 className="text-2xl font-bold text-slate-800 mb-4">Buka Setiap Hari</h3>
-            <p className="text-slate-500 leading-relaxed text-lg">
-              Kami siap melayani hobi futsal Anda setiap hari. Buka mulai pukul 08:00 pagi hingga 03:00 dini hari.
-            </p>
+            <div>
+              <h3 className="text-base font-bold text-slate-800 mb-1">Buka Hingga Dini Hari</h3>
+              <p className="text-slate-500 text-xs leading-relaxed">
+                Siap melayani sparing malam hari mulai pukul 08:00 pagi hingga 03:00 subuh.
+              </p>
+            </div>
           </div>
-          
-          <div className="bg-white/50 backdrop-blur-xl rounded-[2.5rem] p-10 text-center shadow-sm border border-slate-200/60 hover:shadow-2xl hover:shadow-blue-500/5 hover:-translate-y-2 transition-all duration-500 group">
-            <div className="w-20 h-20 rounded-[1.5rem] bg-gradient-to-br from-blue-50 to-indigo-100 text-blue-600 flex items-center justify-center mx-auto mb-8 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-inner">
-              <MapPin size={36} strokeWidth={2.5} />
+
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex items-start gap-4 hover:border-slate-200 hover:shadow-md transition-all">
+            <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+              <MapPin size={22} />
             </div>
-            <h3 className="text-2xl font-bold text-slate-800 mb-4">Lokasi Strategis</h3>
-            <p className="text-slate-500 leading-relaxed text-lg">
-              Terletak di pusat kota yang mudah dijangkau dari berbagai arah, dilengkapi fasilitas parkiran yang luas.
-            </p>
+            <div>
+              <h3 className="text-base font-bold text-slate-800 mb-1">Lokasi & Parkir Luas</h3>
+              <p className="text-slate-500 text-xs leading-relaxed">
+                Akses mudah dijangkau kendaraan roda dua maupun roda empat dengan area parkir aman.
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Premium List Lapangan */}
-        <div className="px-2">
-          <div className="flex flex-col items-center justify-center mb-12 text-center">
-            <h2 className="text-4xl font-extrabold text-slate-800 tracking-tight mb-4">Pilih Lapangan Anda</h2>
-            <p className="text-slate-500 text-lg max-w-2xl">Jelajahi daftar lapangan premium kami dan tentukan arena yang tepat untuk pertandingan Anda berikutnya.</p>
+        {/* List Lapangan - Balanced Size */}
+        <div>
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h2 className="text-xl font-bold text-slate-800 tracking-tight">Pilihan Lapangan</h2>
+              <p className="text-slate-500 text-xs mt-0.5">Tersedia {lapangan.length} lapangan siap pakai dengan fasilitas lengkap.</p>
+            </div>
+            <Link
+              href="/jadwal"
+              className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1.5 transition-colors"
+            >
+              Cek Kalender Jadwal <ArrowRight size={14} />
+            </Link>
           </div>
-          
+
           {lapangan.length > 0 ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {lapangan.map((lap) => (
-                <div key={lap.id_lapangan} className="bg-white rounded-[2.5rem] overflow-hidden shadow-sm border border-slate-100 hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-500 group flex flex-col md:flex-row hover:-translate-y-2">
-                  <div className="relative w-full md:w-2/5 h-72 md:h-auto overflow-hidden bg-slate-900">
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-slate-900/50 z-10 hidden md:block" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent z-10 md:hidden" />
+                <div
+                  key={lap.id_lapangan}
+                  className="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 hover:shadow-lg hover:border-emerald-200 transition-all duration-300 flex flex-col group"
+                >
+                  <div className="relative h-44 overflow-hidden bg-slate-900">
                     {lap.foto ? (
                       <img
                         src={`/assets/img/${lap.foto}`}
                         alt={lap.nama_lapangan}
-                        className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700 ease-out"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-slate-700 bg-slate-800">
-                        <Trophy size={64} className="opacity-20" />
+                      <div className="w-full h-full flex items-center justify-center text-slate-600 bg-slate-800">
+                        <Trophy size={40} className="opacity-30" />
                       </div>
                     )}
 
-                    <div className="absolute top-5 left-5 z-20">
-                      <span className="px-4 py-1.5 bg-emerald-500/90 backdrop-blur-md text-white font-bold text-xs uppercase tracking-wider rounded-full shadow-lg border border-emerald-400/30">
+                    <div className="absolute top-3 left-3 z-10 flex items-center gap-1.5">
+                      <span className="px-2.5 py-1 bg-emerald-500/90 backdrop-blur-md text-white font-bold text-[11px] rounded-lg shadow-sm">
                         Tersedia
                       </span>
+                      {lap.jenis_lantai && (
+                        <span className="px-2.5 py-1 bg-slate-900/80 backdrop-blur-md text-white font-medium text-[11px] rounded-lg border border-white/10">
+                          {lap.jenis_lantai}
+                        </span>
+                      )}
                     </div>
                   </div>
-                  
-                    <div className="p-8 md:p-10 flex-1 flex flex-col justify-center bg-white relative">
-                      <div className="flex items-center gap-3 mb-3">
-                        <h3 className="text-3xl font-bold text-slate-800">{lap.nama_lapangan}</h3>
-                        {lap.jenis_lantai && (
-                          <span className="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg border border-slate-200">
-                            {lap.jenis_lantai}
-                          </span>
+
+                  <div className="p-5 flex-1 flex flex-col justify-between">
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-800 mb-1 group-hover:text-emerald-600 transition-colors">
+                        {lap.nama_lapangan}
+                      </h3>
+                      <p className="text-slate-500 text-xs line-clamp-2 leading-relaxed mb-4">
+                        {lap.fasilitas ? `Fasilitas: ${lap.fasilitas}` : 'Fasilitas lapangan futsal berkualitas dengan pencahayaan terang dan ruang ganti.'}
+                      </p>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-100">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-1.5 text-slate-700">
+                          <Sun size={15} className="text-amber-500" />
+                          <div className="leading-tight">
+                            <span className="text-[10px] text-slate-400 block font-medium">Siang</span>
+                            <span className="text-sm font-bold">Rp {Number(lap.harga).toLocaleString('id-ID')}</span>
+                          </div>
+                        </div>
+
+                        {lap.harga_malam && (
+                          <div className="flex items-center gap-1.5 text-slate-700 pl-3 border-l border-slate-100">
+                            <Moon size={15} className="text-indigo-500" />
+                            <div className="leading-tight">
+                              <span className="text-[10px] text-indigo-500 block font-medium">Malam (20+)</span>
+                              <span className="text-sm font-bold text-indigo-700">Rp {Number(lap.harga_malam).toLocaleString('id-ID')}</span>
+                            </div>
+                          </div>
                         )}
                       </div>
-                      
-                      <p className="text-slate-500 text-base mb-6 leading-relaxed">
-                        {lap.fasilitas ? `Fasilitas: ${lap.fasilitas}` : `Nikmati pengalaman bermain terbaik dengan fasilitas lengkap dan kenyamanan maksimal di ${lap.nama_lapangan}.`}
-                      </p>
-                      
-                      <div className="mt-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 border-t border-slate-100 pt-6">
-                        <div className="flex flex-col gap-2">
-                          <div className="flex flex-wrap items-center gap-3">
-                            <div className="flex items-center gap-2 bg-amber-50 border border-amber-200/80 px-3 py-1.5 rounded-xl">
-                              <Sun size={16} className="text-amber-500" />
-                              <div className="leading-tight">
-                                <span className="text-[10px] uppercase font-bold text-amber-700 block">Siang</span>
-                                <span className="text-base font-black text-slate-800">Rp {Number(lap.harga).toLocaleString('id-ID')}</span>
-                              </div>
-                            </div>
-                            {lap.harga_malam && (
-                              <div className="flex items-center gap-2 bg-indigo-50 border border-indigo-200/80 px-3 py-1.5 rounded-xl">
-                                <Moon size={16} className="text-indigo-500" />
-                                <div className="leading-tight">
-                                  <span className="text-[10px] uppercase font-bold text-indigo-700 block">Malam (20:00+)</span>
-                                  <span className="text-base font-black text-indigo-700">Rp {Number(lap.harga_malam).toLocaleString('id-ID')}</span>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                          {lap.harga_weekend && (
-                            <div className="text-xs font-semibold text-slate-500 flex items-center justify-between bg-slate-50 px-3 py-1.5 rounded-md border border-slate-100">
-                              <span>Weekend (Sab-Min)</span>
-                              <span className="text-indigo-600 font-bold">Rp {Number(lap.harga_weekend).toLocaleString('id-ID')}</span>
-                            </div>
-                          )}
-                        </div>
-                        
-                        <Link
-                          href="/booking"
-                          className="w-full sm:w-auto px-8 py-4 bg-slate-900 text-white hover:bg-emerald-500 font-bold text-center rounded-2xl transition-all duration-300 shadow-xl shadow-slate-900/10 hover:shadow-emerald-500/20 relative overflow-hidden group/btn"
-                        >
-                          <span className="relative z-10 flex items-center justify-center gap-2">
-                            Booking
-                            <ArrowRight size={18} className="group-hover/btn:translate-x-1 transition-transform" />
-                          </span>
-                        </Link>
-                      </div>
+
+                      <Link
+                        href="/booking"
+                        className="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs text-center rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-sm"
+                      >
+                        Booking Sekarang
+                        <ArrowRight size={14} />
+                      </Link>
                     </div>
+                  </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="text-center py-24 bg-white rounded-[3rem] border border-slate-200 border-dashed shadow-sm">
-              <div className="inline-flex w-24 h-24 bg-slate-50 text-slate-400 rounded-full items-center justify-center mb-6 shadow-inner">
-                <ShieldCheck size={48} strokeWidth={1.5} />
+            <div className="text-center py-12 bg-white rounded-2xl border border-slate-200 border-dashed shadow-sm">
+              <div className="inline-flex w-14 h-14 bg-slate-50 text-slate-400 rounded-full items-center justify-center mb-3">
+                <ShieldCheck size={28} />
               </div>
-              <h3 className="text-2xl font-bold text-slate-800 mb-3">Belum ada lapangan</h3>
-              <p className="text-slate-500 max-w-sm mx-auto text-lg">Data lapangan belum tersedia. Silakan hubungi admin untuk informasi lebih lanjut.</p>
+              <h3 className="text-base font-bold text-slate-800 mb-1">Belum Ada Lapangan</h3>
+              <p className="text-slate-500 text-xs max-w-sm mx-auto">Data lapangan belum tersedia. Silakan cek kembali nanti.</p>
             </div>
           )}
         </div>
